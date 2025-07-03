@@ -116,7 +116,7 @@ export default function FAQPage() {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-lg sm:text-xl text-blue-100 mb-8 max-w-2xl mx-auto px-4"
           >
-            پاسخ سوالات رایج شما را در اینجا پیدا کنید
+            پاسخ سوالات خود را در اینجا پیدا کنید
           </motion.p>
 
           {/* Search Box */}
