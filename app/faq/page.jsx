@@ -15,21 +15,20 @@ import { ChevronDown, HelpCircle, Search, Play, X } from "lucide-react";
 const faqData = [
   {
     id: 1,
-    question: "چگونه می‌توانم حساب کاربری جدید ایجاد کنم؟",
-    answer:
-      "برای ایجاد حساب کاربری جدید، روی دکمه 'ثبت نام' در بالای صفحه کلیک کنید و فرم مربوطه را تکمیل نمایید. پس از تأیید ایمیل، حساب شما فعال خواهد شد.",
+    question: "شرایط گرفتن وام چیست؟",
+    answer: "",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     videoTitle: "آموزش ثبت نام",
   },
   {
     id: 2,
-    question: "آیا امکان تغییر رمز عبور وجود دارد؟",
+    question: "آیا وام سود دارد؟",
     answer:
       "بله، شما می‌توانید از طریق بخش 'تنظیمات حساب کاربری' رمز عبور خود را تغییر دهید. همچنین در صورت فراموشی رمز عبور، می‌توانید از گزینه 'فراموشی رمز عبور' استفاده کنید.",
   },
   {
     id: 3,
-    question: "چگونه می‌توانم با پشتیبانی تماس بگیرم؟",
+    question: "وام نیاز به ضامن دارد؟",
     answer:
       "شما می‌توانید از طریق ایمیل support@example.com، تلفن 021-12345678 یا چت آنلاین در سایت با تیم پشتیبانی ما در تماس باشید. ساعات کاری پشتیبانی از 8 صبح تا 8 شب است.",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
@@ -37,19 +36,19 @@ const faqData = [
   },
   {
     id: 4,
-    question: "آیا خدمات شما رایگان است؟",
+    question: "سقف وام چه مبلغی می‌باشد؟",
     answer:
       "ما هم پلن رایگان و هم پلن‌های پریمیوم ارائه می‌دهیم. پلن رایگان شامل امکانات پایه است و برای دسترسی به امکانات پیشرفته می‌توانید پلن پریمیوم را انتخاب کنید.",
   },
   {
     id: 5,
-    question: "چگونه می‌توانم اشتراک خود را لغو کنم؟",
+    question: "باز پرداخت وام به چه شکل می‌باشد؟",
     answer:
       "برای لغو اشتراک، به بخش 'مدیریت اشتراک' در پنل کاربری خود مراجعه کنید و روی گزینه 'لغو اشتراک' کلیک نمایید. اشتراک شما تا پایان دوره پرداخت شده فعال خواهد ماند.",
   },
   {
     id: 6,
-    question: "آیا اطلاعات من امن است؟",
+    question: "آیا برای گرفتن وام نیاز به مراجعه به بانک هست؟",
     answer:
       "بله، ما از بالاترین استانداردهای امنیتی برای محافظت از اطلاعات شما استفاده می‌کنیم. تمام داده‌ها با رمزنگاری SSL محافظت می‌شوند و ما هرگز اطلاعات شخصی شما را با اشخاص ثالث به اشتراک نمی‌گذاریم.",
   },
@@ -141,7 +140,7 @@ export default function FAQPage() {
           </motion.div>
         </div>
 
-        {/* Animated Background Elements */}
+        {/* Animated Background Elements
         <motion.div
           animate={{
             x: [0, 30, 0],
@@ -157,7 +156,7 @@ export default function FAQPage() {
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
           <div className="absolute top-1/2 -left-20 w-60 h-60 bg-purple-300/20 rounded-full blur-2xl"></div>
           <div className="absolute -bottom-10 right-1/3 w-32 h-32 bg-blue-300/20 rounded-full blur-xl"></div>
-        </motion.div>
+        </motion.div> */}
       </motion.div>
 
       {/* FAQ Section */}
@@ -280,13 +279,13 @@ export default function FAQPage() {
               >
                 تماس با پشتیبانی
               </motion.button>
-              <motion.button
+              {/* <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="px-6 py-3 bg-white text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors duration-200 font-medium text-sm sm:text-base"
               >
                 ارسال تیکت
-              </motion.button>
+              </motion.button> */}
             </div>
           </div>
         </motion.div>
