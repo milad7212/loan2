@@ -380,13 +380,14 @@ export default function FAQPage() {
               تیم پشتیبانی ما آماده کمک به شما است
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <motion.button
+              <motion.a
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                href="tel:09131913952"
                 className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-medium text-sm sm:text-base"
               >
                 تماس با پشتیبانی
-              </motion.button>
+              </motion.a>
               {/* <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
