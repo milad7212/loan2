@@ -25,6 +25,7 @@ const banks = [
   {
     id: "mellat",
     name: "بانک رسالت",
+    logo: "/images/resalat-logo.png",
     rate: "4%",
     maxAmount: "300 میلیون",
     features: ["بدون ضامن", "تسویه آسان", "پردازش سریع"],
@@ -50,7 +51,6 @@ const banks = [
     bgColor: "bg-purple-500",
   },
 ];
-
 export default function LoanWizard() {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState({
@@ -70,14 +70,14 @@ export default function LoanWizard() {
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
-      setShowVideo(false); // Reset video state
+      setShowVideo(false);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      setShowVideo(false); // Reset video state
+      setShowVideo(false);
     }
   };
 
@@ -103,64 +103,55 @@ export default function LoanWizard() {
     return { recommendation, discount };
   };
 
-  // Custom styles
+  // Minimal styles
   const gradientBg = {
-    background:
-      "linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #be185d 100%)",
+    background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
     minHeight: "100vh",
   };
 
   const glassCard = {
-    background: "rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(20px)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    borderRadius: "24px",
+    background: "rgba(255, 255, 255, 0.9)",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(0, 0, 0, 0.1)",
+    borderRadius: "20px",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
   };
 
   const buttonPrimary = {
-    background: "linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%)",
+    background: "#1f2937",
     border: "none",
-    borderRadius: "16px",
-    color: "white",
-    fontWeight: "600",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 4px 15px rgba(236, 72, 153, 0.3)",
-  };
-
-  const buttonSecondary = {
-    background: "rgba(255, 255, 255, 0.15)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    borderRadius: "16px",
+    borderRadius: "12px",
     color: "white",
     fontWeight: "500",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    backdropFilter: "blur(10px)",
   };
 
-  const alertSuccess = {
-    background: "rgba(34, 197, 94, 0.15)",
-    border: "1px solid rgba(34, 197, 94, 0.3)",
-    borderRadius: "16px",
-    padding: "16px",
-    backdropFilter: "blur(10px)",
+  const buttonSecondary = {
+    background: "transparent",
+    border: "2px solid #e5e7eb",
+    borderRadius: "12px",
+    color: "#374151",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
   };
 
-  const alertInfo = {
-    background: "rgba(59, 130, 246, 0.15)",
-    border: "1px solid rgba(59, 130, 246, 0.3)",
-    borderRadius: "16px",
-    padding: "16px",
-    backdropFilter: "blur(10px)",
+  const buttonSelected = {
+    background: "#1f2937",
+    border: "2px solid #1f2937",
+    borderRadius: "12px",
+    color: "white",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
   };
 
-  const alertWarning = {
-    background: "rgba(245, 158, 11, 0.15)",
-    border: "1px solid rgba(245, 158, 11, 0.3)",
-    borderRadius: "16px",
+  const alertBox = {
+    background: "#f3f4f6",
+    border: "1px solid #d1d5db",
+    borderRadius: "12px",
     padding: "16px",
-    backdropFilter: "blur(10px)",
   };
 
   const progressPercentage = ((currentStep + 1) / steps.length) * 100;
@@ -174,15 +165,15 @@ export default function LoanWizard() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-6 pt-4 sm:pt-8"
         >
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">
             خرید امتیاز وام
           </h1>
-          <p className="text-purple-200 text-sm sm:text-base">
+          <p className="text-gray-600 text-sm sm:text-base">
             مسیر هوشمند برای دریافت بهترین وام
           </p>
         </motion.div>
 
-        {/* Modern Progress Bar */}
+        {/* Minimal Progress Bar */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -190,127 +181,72 @@ export default function LoanWizard() {
         >
           {/* Progress Header */}
           <div className="flex justify-between items-center mb-4">
-            <div className="text-white">
-              <span className="text-lg sm:text-xl font-bold">
+            <div className="text-gray-900">
+              <span className="text-lg sm:text-xl font-semibold">
                 {steps[currentStep]}
               </span>
             </div>
-            <div className="text-purple-200 text-sm bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">
+            <div className="text-gray-500 text-sm bg-gray-100 px-3 py-1 rounded-full">
               <span className="font-medium">{currentStep + 1}</span>
               <span className="mx-1">از</span>
               <span className="font-medium">{steps.length}</span>
             </div>
           </div>
 
-          {/* Progress Bar Container */}
+          {/* Simple Progress Bar */}
           <div className="relative mb-4">
-            {/* Background Bar */}
-            <div
-              className="h-3 rounded-full relative overflow-hidden"
-              style={{ background: "rgba(255, 255, 255, 0.15)" }}
-            >
-              {/* Animated Progress Fill */}
+            <div className="h-2 rounded-full bg-gray-200">
               <motion.div
-                className="h-full rounded-full relative overflow-hidden"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #ec4899 0%, #8b5cf6 50%, #06b6d4 100%)",
-                  boxShadow: "0 0 20px rgba(236, 72, 153, 0.5)",
-                }}
+                className="h-full rounded-full bg-gray-900"
                 initial={{ width: "0%" }}
                 animate={{ width: `${progressPercentage}%` }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
-              >
-                {/* Shimmer Effect */}
-                <motion.div
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)",
-                  }}
-                  animate={{ x: ["-100%", "100%"] }}
-                  transition={{
-                    duration: 2,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "linear",
-                  }}
-                />
-              </motion.div>
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
             </div>
 
-            {/* Progress Dots */}
+            {/* Simple Progress Dots */}
             <div className="flex justify-between absolute -top-1 w-full">
               {steps.map((_, index) => (
-                <motion.div
+                <div
                   key={index}
-                  className="w-5 h-5 rounded-full border-2 flex items-center justify-center relative z-10"
+                  className="w-4 h-4 rounded-full border-2 flex items-center justify-center bg-white"
                   style={{
-                    background:
-                      index <= currentStep
-                        ? "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)"
-                        : "rgba(255, 255, 255, 0.2)",
-                    borderColor:
-                      index <= currentStep
-                        ? "white"
-                        : "rgba(255, 255, 255, 0.3)",
-                    boxShadow:
-                      index <= currentStep
-                        ? "0 0 15px rgba(236, 72, 153, 0.6)"
-                        : "none",
+                    borderColor: index <= currentStep ? "#1f2937" : "#d1d5db",
                   }}
-                  animate={{
-                    scale: index === currentStep ? 1.3 : 1,
-                    rotate: index < currentStep ? 360 : 0,
-                  }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
                 >
                   {index < currentStep && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <CheckCircle size={12} className="text-white" />
-                    </motion.div>
+                    <CheckCircle size={10} className="text-gray-900" />
                   )}
                   {index === currentStep && (
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Number.POSITIVE_INFINITY,
-                      }}
-                      className="w-2 h-2 bg-white rounded-full"
-                    />
+                    <div className="w-2 h-2 bg-gray-900 rounded-full" />
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
 
           {/* Step Labels for Desktop */}
-          <div className="hidden sm:flex justify-between text-xs text-purple-200">
+          <div className="hidden sm:flex justify-between text-xs text-gray-500">
             {steps.map((step, index) => (
-              <motion.span
+              <span
                 key={index}
-                className={`transition-all duration-300 ${
-                  index <= currentStep ? "text-white font-medium" : ""
-                }`}
-                animate={{ opacity: index <= currentStep ? 1 : 0.6 }}
+                className={
+                  index <= currentStep ? "text-gray-900 font-medium" : ""
+                }
               >
                 {step}
-              </motion.span>
+              </span>
             ))}
           </div>
         </motion.div>
 
-        {/* Main Content - Fixed Height Container */}
+        {/* Main Content */}
         <motion.div
           style={glassCard}
-          className="p-4 sm:p-8 shadow-2xl relative overflow-hidden"
-          initial={{ opacity: 0, scale: 0.9 }}
+          className="p-4 sm:p-8"
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.3 }}
         >
           {/* Content Container with Fixed Min Height */}
           <div className="min-h-[400px] sm:min-h-[500px] flex flex-col">
@@ -319,47 +255,34 @@ export default function LoanWizard() {
               {currentStep === 0 && (
                 <motion.div
                   key="step1"
-                  initial={{ opacity: 0, x: 50 }}
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
                   className="text-center flex-1 flex flex-col justify-center"
                 >
-                  <motion.div
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                    }}
-                    className="mb-6"
-                  >
-                    <div
-                      className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-4"
-                      style={{
-                        background:
-                          "linear-gradient(90deg, #fbbf24 0%, #f97316 100%)",
-                      }}
-                    >
+                  <div className="mb-6">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-gray-100">
                       <TrendingUp
                         size={24}
-                        className="text-white sm:w-10 sm:h-10"
+                        className="text-gray-700 sm:w-8 sm:h-8"
                       />
                     </div>
-                  </motion.div>
+                  </div>
 
-                  <h2 className="text-xl sm:text-3xl font-bold text-white mb-4">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">
                     مدرک شغلی دارید؟
                   </h2>
 
-                  <div style={alertSuccess} className="mb-6">
+                  <div style={alertBox} className="mb-6">
                     <div className="flex items-center justify-center mb-2">
-                      <AlertCircle className="text-green-400 mr-2" size={18} />
-                      <span className="text-green-300 font-semibold text-sm sm:text-base">
+                      <AlertCircle className="text-gray-600 mr-2" size={16} />
+                      <span className="text-gray-700 font-medium text-sm">
                         نکته مهم
                       </span>
                     </div>
-                    <p className="text-green-200 text-xs sm:text-sm leading-relaxed">
-                      داشتن مدرک شغلی می‌تواند نرخ سود شما را تا ۲٪ کاهش دهد!
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                      داشتن مدرک شغلی می‌تواند نرخ سود شما را تا ۲٪ کاهش دهد
                     </p>
                   </div>
 
@@ -372,12 +295,12 @@ export default function LoanWizard() {
                       }
                       style={
                         stepData.hasJobCertificate === true
-                          ? buttonPrimary
+                          ? buttonSelected
                           : buttonSecondary
                       }
-                      className="px-6 py-3 sm:px-8 sm:py-4 font-semibold transition-all text-sm sm:text-base"
+                      className="px-6 py-3 sm:px-8 sm:py-3 transition-all text-sm sm:text-base"
                     >
-                      ✅ بله، دارم
+                      بله، دارم
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
@@ -387,24 +310,20 @@ export default function LoanWizard() {
                       }
                       style={
                         stepData.hasJobCertificate === false
-                          ? {
-                              ...buttonPrimary,
-                              background:
-                                "linear-gradient(90deg, #ef4444 0%, #ec4899 100%)",
-                            }
+                          ? buttonSelected
                           : buttonSecondary
                       }
-                      className="px-6 py-3 sm:px-8 sm:py-4 font-semibold transition-all text-sm sm:text-base"
+                      className="px-6 py-3 sm:px-8 sm:py-3 transition-all text-sm sm:text-base"
                     >
-                      ❌ خیر، ندارم
+                      خیر، ندارم
                     </motion.button>
                   </div>
 
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setShowVideo(!showVideo)}
-                    style={alertInfo}
-                    className="flex items-center justify-center mx-auto text-blue-300 hover:bg-blue-500/30 transition-all cursor-pointer border-none text-sm sm:text-base w-full sm:w-auto"
+                    style={alertBox}
+                    className="flex items-center justify-center mx-auto text-gray-600 hover:text-gray-800 transition-all cursor-pointer border-none text-sm sm:text-base w-full sm:w-auto"
                   >
                     <Play size={16} className="mr-2" />
                     مدرک شغلی چیست؟
@@ -417,14 +336,10 @@ export default function LoanWizard() {
                         animate={{ opacity: 1, height: "auto", marginTop: 16 }}
                         exit={{ opacity: 0, height: 0, marginTop: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="rounded-xl p-3 sm:p-4"
-                        style={{ background: "rgba(0, 0, 0, 0.3)" }}
+                        className="rounded-xl p-3 sm:p-4 bg-gray-50 border border-gray-200"
                       >
-                        <div
-                          className="aspect-video rounded-lg flex items-center justify-center"
-                          style={{ background: "#1f2937" }}
-                        >
-                          <p className="text-gray-300 text-sm sm:text-base">
+                        <div className="aspect-video rounded-lg flex items-center justify-center bg-gray-200">
+                          <p className="text-gray-600 text-sm sm:text-base">
                             ویدیو توضیحی مدرک شغلی
                           </p>
                         </div>
@@ -438,46 +353,33 @@ export default function LoanWizard() {
               {currentStep === 1 && (
                 <motion.div
                   key="step2"
-                  initial={{ opacity: 0, x: 50 }}
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
                   className="text-center flex-1 flex flex-col justify-center"
                 >
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                    }}
-                    className="mb-6"
-                  >
-                    <div
-                      className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-4"
-                      style={{
-                        background:
-                          "linear-gradient(90deg, #60a5fa 0%, #06b6d4 100%)",
-                      }}
-                    >
+                  <div className="mb-6">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-gray-100">
                       <Shield
                         size={24}
-                        className="text-white sm:w-10 sm:h-10"
+                        className="text-gray-700 sm:w-8 sm:h-8"
                       />
                     </div>
-                  </motion.div>
+                  </div>
 
-                  <h2 className="text-xl sm:text-3xl font-bold text-white mb-4">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">
                     اعتبارسنجی مرات دارید؟
                   </h2>
 
-                  <div style={alertInfo} className="mb-6">
+                  <div style={alertBox} className="mb-6">
                     <div className="flex items-center justify-center mb-2">
-                      <Star className="text-blue-400 mr-2" size={18} />
-                      <span className="text-blue-300 font-semibold text-sm sm:text-base">
+                      <Star className="text-gray-600 mr-2" size={16} />
+                      <span className="text-gray-700 font-medium text-sm">
                         مزیت اضافی
                       </span>
                     </div>
-                    <p className="text-blue-200 text-xs sm:text-sm leading-relaxed">
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                       اعتبارسنجی مثبت نرخ سود را ۱٪ کاهش می‌دهد
                     </p>
                   </div>
@@ -491,12 +393,12 @@ export default function LoanWizard() {
                       }
                       style={
                         stepData.hasCreditHistory === true
-                          ? buttonPrimary
+                          ? buttonSelected
                           : buttonSecondary
                       }
-                      className="px-6 py-3 sm:px-8 sm:py-4 font-semibold transition-all text-sm sm:text-base"
+                      className="px-6 py-3 sm:px-8 sm:py-3 transition-all text-sm sm:text-base"
                     >
-                      ✅ بله، دارم
+                      بله، دارم
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
@@ -506,16 +408,12 @@ export default function LoanWizard() {
                       }
                       style={
                         stepData.hasCreditHistory === false
-                          ? {
-                              ...buttonPrimary,
-                              background:
-                                "linear-gradient(90deg, #ef4444 0%, #ec4899 100%)",
-                            }
+                          ? buttonSelected
                           : buttonSecondary
                       }
-                      className="px-6 py-3 sm:px-8 sm:py-4 font-semibold transition-all text-sm sm:text-base"
+                      className="px-6 py-3 sm:px-8 sm:py-3 transition-all text-sm sm:text-base"
                     >
-                      ❌ خیر، ندارم
+                      خیر، ندارم
                     </motion.button>
                   </div>
                 </motion.div>
@@ -525,13 +423,13 @@ export default function LoanWizard() {
               {currentStep === 2 && (
                 <motion.div
                   key="step3"
-                  initial={{ opacity: 0, x: 50 }}
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
                   className="flex-1"
                 >
-                  <h2 className="text-xl sm:text-3xl font-bold text-white text-center mb-6 sm:mb-8">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 text-center mb-6 sm:mb-8">
                     انتخاب بانک
                   </h2>
 
@@ -539,7 +437,7 @@ export default function LoanWizard() {
                     {banks.map((bank, index) => (
                       <motion.div
                         key={bank.id}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ scale: 1.01 }}
@@ -547,57 +445,52 @@ export default function LoanWizard() {
                         onClick={() =>
                           setStepData({ ...stepData, selectedBank: bank.id })
                         }
-                        className="p-4 sm:p-6 cursor-pointer transition-all border-2 relative overflow-hidden"
+                        className="p-4 sm:p-5 cursor-pointer transition-all border-2 relative"
                         style={{
-                          borderRadius: "20px",
+                          borderRadius: "16px",
                           borderColor:
                             stepData.selectedBank === bank.id
-                              ? "white"
-                              : "rgba(255, 255, 255, 0.2)",
+                              ? "#1f2937"
+                              : "#e5e7eb",
                           background:
                             stepData.selectedBank === bank.id
-                              ? "rgba(255, 255, 255, 0.25)"
-                              : "rgba(255, 255, 255, 0.1)",
-                          boxShadow:
-                            stepData.selectedBank === bank.id
-                              ? "0 8px 32px rgba(236, 72, 153, 0.3)"
-                              : "none",
-                          backdropFilter: "blur(20px)",
+                              ? "#f9fafb"
+                              : "white",
                         }}
                       >
                         {stepData.selectedBank === bank.id && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute top-3 right-3"
-                          >
-                            <CheckCircle size={20} className="text-green-400" />
-                          </motion.div>
+                          <div className="absolute top-3 right-3">
+                            <CheckCircle size={18} className="text-gray-900" />
+                          </div>
                         )}
 
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex items-center mb-3 sm:mb-0">
-                            <div
-                              className={`w-10 h-10 sm:w-12 sm:h-12 ${bank.bgColor} rounded-full flex items-center justify-center ml-3 sm:ml-4`}
-                            >
-                              <span className="text-white font-bold text-sm sm:text-lg">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex items-center justify-center ml-3 sm:ml-4">
+                              <span className="text-gray-700 font-semibold text-sm sm:text-base">
                                 {bank.name.charAt(4)}
                               </span>
+                              {/* <Image
+                                src={bank.logo}
+                                alt={bank.name}
+                                layout="fill"
+                                objectFit="contain"
+                              /> */}
                             </div>
                             <div>
-                              <h3 className="text-lg sm:text-xl font-bold text-white">
+                              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                                 {bank.name}
                               </h3>
-                              <p className="text-purple-200 text-sm">
+                              <p className="text-gray-600 text-sm">
                                 نرخ سود: {bank.rate}
                               </p>
                             </div>
                           </div>
                           <div className="text-left sm:text-right">
-                            <p className="text-white font-semibold text-sm sm:text-base">
+                            <p className="text-gray-900 font-semibold text-sm sm:text-base">
                               {bank.maxAmount}
                             </p>
-                            <p className="text-purple-200 text-xs sm:text-sm">
+                            <p className="text-gray-500 text-xs sm:text-sm">
                               حداکثر مبلغ
                             </p>
                           </div>
@@ -607,8 +500,7 @@ export default function LoanWizard() {
                           {bank.features.map((feature, idx) => (
                             <span
                               key={idx}
-                              className="text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm"
-                              style={{ background: "rgba(255, 255, 255, 0.2)" }}
+                              className="text-gray-600 px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm bg-gray-100"
                             >
                               {feature}
                             </span>
@@ -624,63 +516,40 @@ export default function LoanWizard() {
               {currentStep === 3 && (
                 <motion.div
                   key="step4"
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
                   className="text-center flex-1 flex flex-col justify-center"
                 >
-                  <motion.div
-                    // animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: "linear",
-                    }}
-                    className="mb-6"
-                  >
-                    <div
-                      className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-4"
-                      style={{
-                        background:
-                          "linear-gradient(90deg, #4ade80 0%, #10b981 100%)",
-                      }}
-                    >
+                  <div className="mb-6">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-gray-100">
                       <CheckCircle
                         size={24}
-                        className="text-white sm:w-10 sm:h-10"
+                        className="text-gray-700 sm:w-8 sm:h-8"
                       />
                     </div>
-                  </motion.div>
+                  </div>
 
-                  <h2 className="text-xl sm:text-3xl font-bold text-white mb-6">
-                    🎉 نتیجه نهایی
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">
+                    نتیجه نهایی
                   </h2>
 
                   <div
-                    className="p-4 sm:p-6 mb-6 border"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%)",
-                      borderColor: "#22c55e",
-                      borderRadius: "20px",
-                      backdropFilter: "blur(10px)",
-                    }}
+                    className="p-4 sm:p-6 mb-6 border border-gray-200 bg-gray-50"
+                    style={{ borderRadius: "16px" }}
                   >
-                    <h3 className="text-lg sm:text-xl font-bold text-green-300 mb-4">
-                      💡 توصیه ما برای شما
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+                      توصیه ما برای شما
                     </h3>
-                    <p className="text-green-200 text-sm sm:text-lg leading-relaxed">
+                    <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
                       {getBestLoan().recommendation}
                     </p>
 
                     {getBestLoan().discount > 0 && (
-                      <div
-                        className="mt-4 p-3 sm:p-4 border"
-                        style={alertWarning}
-                      >
-                        <p className="text-yellow-300 font-semibold text-sm sm:text-base">
-                          🎉 تبریک! شما {getBestLoan().discount}٪ تخفیف دریافت
+                      <div className="mt-4 p-3 sm:p-4 border border-gray-200 bg-white rounded-xl">
+                        <p className="text-gray-800 font-medium text-sm sm:text-base">
+                          تبریک! شما {getBestLoan().discount}٪ تخفیف دریافت
                           کردید
                         </p>
                       </div>
@@ -694,13 +563,12 @@ export default function LoanWizard() {
                       ...buttonPrimary,
                       padding: "14px 28px",
                       fontSize: "16px",
-                      boxShadow: "0 10px 25px rgba(236, 72, 153, 0.4)",
                     }}
                     className="w-full sm:w-auto"
                   >
                     <span className="flex items-center justify-center">
                       درخواست وام
-                      <ArrowLeft size={18} className="mr-2" />
+                      <ArrowLeft size={16} className="mr-2" />
                     </span>
                   </motion.button>
                 </motion.div>
@@ -715,20 +583,20 @@ export default function LoanWizard() {
               whileTap={{ scale: 0.98 }}
               onClick={prevStep}
               disabled={currentStep === 0}
-              className="flex items-center px-4 py-2 sm:px-6 sm:py-3 font-semibold transition-all text-sm sm:text-base"
+              className="flex items-center px-4 py-2 sm:px-6 sm:py-3 transition-all text-sm sm:text-base"
               style={
                 currentStep === 0
                   ? {
-                      background: "rgba(75, 85, 99, 0.5)",
+                      background: "#f3f4f6",
                       color: "#9ca3af",
                       cursor: "not-allowed",
-                      borderRadius: "16px",
-                      border: "1px solid rgba(75, 85, 99, 0.3)",
+                      borderRadius: "12px",
+                      border: "1px solid #e5e7eb",
                     }
-                  : { ...buttonSecondary, borderRadius: "16px" }
+                  : { ...buttonSecondary, borderRadius: "12px" }
               }
             >
-              <ChevronRight size={18} className="ml-1 sm:ml-2" />
+              <ChevronRight size={16} className="ml-1 sm:ml-2" />
               قبلی
             </motion.button>
 
@@ -742,24 +610,24 @@ export default function LoanWizard() {
                 (currentStep === 1 && stepData.hasCreditHistory === null) ||
                 (currentStep === 2 && stepData.selectedBank === null)
               }
-              className="flex items-center px-4 py-2 sm:px-6 sm:py-3 font-semibold transition-all text-sm sm:text-base"
+              className="flex items-center px-4 py-2 sm:px-6 sm:py-3 transition-all text-sm sm:text-base"
               style={
                 currentStep === steps.length - 1 ||
                 (currentStep === 0 && stepData.hasJobCertificate === null) ||
                 (currentStep === 1 && stepData.hasCreditHistory === null) ||
                 (currentStep === 2 && stepData.selectedBank === null)
                   ? {
-                      background: "rgba(75, 85, 99, 0.5)",
+                      background: "#f3f4f6",
                       color: "#9ca3af",
                       cursor: "not-allowed",
-                      borderRadius: "16px",
-                      border: "1px solid rgba(75, 85, 99, 0.3)",
+                      borderRadius: "12px",
+                      border: "1px solid #e5e7eb",
                     }
-                  : { ...buttonPrimary, borderRadius: "16px" }
+                  : { ...buttonPrimary, borderRadius: "12px" }
               }
             >
               {currentStep === steps.length - 1 ? "تمام" : "بعدی"}
-              <ChevronLeft size={18} className="mr-1 sm:mr-2" />
+              <ChevronLeft size={16} className="mr-1 sm:mr-2" />
             </motion.button>
           </div>
         </motion.div>
