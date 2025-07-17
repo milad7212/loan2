@@ -2,69 +2,69 @@
 
 import { useState } from "react"
 
-// interface Buyer {
-//   id: string
-//   name: string
-//   phone: string
-//   nationalId: string
-//   referrer?: string
-//   requestedAmount: number
-//   remainingAmount: number
-//   status: "pending" | "partial" | "completed"
-// }
+interface Buyer {
+  id: string
+  name: string
+  phone: string
+  nationalId: string
+  referrer?: string
+  requestedAmount: number
+  remainingAmount: number
+  status: "pending" | "partial" | "completed"
+}
 
-// interface Seller {
-//   id: string
-//   name: string
-//   lastName: string
-//   phone: string
-//   accountNumber: string
-//   cardNumber: string
-//   creditAmount: number
-//   remainingAmount: number
-//   status: "active" | "completed"
-// }
+interface Seller {
+  id: string
+  name: string
+  lastName: string
+  phone: string
+  accountNumber: string
+  cardNumber: string
+  creditAmount: number
+  remainingAmount: number
+  status: "active" | "completed"
+}
 
-// interface Transaction {
-//   id: string
-//   sellerId: string
-//   buyerIds: string[]
-//   amount: number
-//   status: "pending_transfer" | "transferred" | "pending_payment" | "completed" | "cancelled"
-//   date: string
-//   sellerName: string
-//   buyerNames: string[]
-//   sellerPhone: string
-//   sellerNationalId: string
-//   buyerPhones: string[]
-//   buyerNationalIds: string[]
-//   buyerReferrers: (string | undefined)[]
-//   trackingCode: string
-//   message: string
-//   history: Array<{
-//     status: string
-//     description: string
-//     date: string
-//     time: string
-//     image?: string
-//   }>
-// }
+interface Transaction {
+  id: string
+  sellerId: string
+  buyerIds: string[]
+  amount: number
+  status: "pending_transfer" | "transferred" | "pending_payment" | "completed" | "cancelled"
+  date: string
+  sellerName: string
+  buyerNames: string[]
+  sellerPhone: string
+  sellerNationalId: string
+  buyerPhones: string[]
+  buyerNationalIds: string[]
+  buyerReferrers: (string | undefined)[]
+  trackingCode: string
+  message: string
+  history: Array<{
+    status: string
+    description: string
+    date: string
+    time: string
+    image?: string
+  }>
+}
 
-// interface PaymentGroup {
-//   sellerPhone: string
-//   sellerName: string
-//   sellerCardNumber: string
-//   transactions: Transaction[]
-//   totalAmount: number
-//   referrerPayments: Array<{
-//     referrerName: string
-//     totalAmount: number
-//     transactions: Transaction[]
-//   }>
-// }
+interface PaymentGroup {
+  sellerPhone: string
+  sellerName: string
+  sellerCardNumber: string
+  transactions: Transaction[]
+  totalAmount: number
+  referrerPayments: Array<{
+    referrerName: string
+    totalAmount: number
+    transactions: Transaction[]
+  }>
+}
 
 export default function LoanCreditAdmin() {
-  const [buyers, setBuyers] = useState([
+  const [buyers, setBuyers] = useState<Buyer[]>([
     {
       id: "1",
       name: "احمد محمدی",
@@ -105,7 +105,7 @@ export default function LoanCreditAdmin() {
     },
   ])
 
-  const [sellers, setSellers] = useState([
+  const [sellers, setSellers] = useState<Seller[]>([
     {
       id: "1",
       name: "حسن",
@@ -119,7 +119,7 @@ export default function LoanCreditAdmin() {
     },
   ])
 
-  const [transactions, setTransactions] = useState([
+  const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: "1",
       sellerId: "1",
@@ -207,24 +207,24 @@ export default function LoanCreditAdmin() {
     creditAmount: 0,
   })
 
-  const [selectedSeller, setSelectedSeller] = useState("")
-  const [selectedBuyers, setSelectedBuyers] = useState([])
+  const [selectedSeller, setSelectedSeller] = useState<string>("")
+  const [selectedBuyers, setSelectedBuyers] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [sortField, setSortField] = useState("date")
+  const [sortField, setSortField] = useState<string>("date")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [selectedTransaction, setSelectedTransaction] = useState(null)
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false)
-  const [selectedPrintTransaction, setSelectedPrintTransaction] = useState(null)
+  const [selectedPrintTransaction, setSelectedPrintTransaction] = useState<Transaction | null>(null)
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
-  const [selectedStatusTransaction, setSelectedStatusTransaction] = useState(null)
+  const [selectedStatusTransaction, setSelectedStatusTransaction] = useState<Transaction | null>(null)
   const [statusDescription, setStatusDescription] = useState("")
-  const [uploadedImage, setUploadedImage] = useState(null)
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
-  const [selectedPaymentGroup, setSelectedPaymentGroup] = useState(null)
+  const [selectedPaymentGroup, setSelectedPaymentGroup] = useState<PaymentGroup | null>(null)
   const [paymentDescription, setPaymentDescription] = useState("")
-  const [paymentImage, setPaymentImage] = useState(null)
+  const [paymentImage, setPaymentImage] = useState<string | null>(null)
 
   // اضافه کردن state جدید برای مودال اضافه کردن خریدار
   const [isAddBuyerModalOpen, setIsAddBuyerModalOpen] = useState(false)
@@ -240,7 +240,7 @@ export default function LoanCreditAdmin() {
   const CREDIT_PRICE = 135000 // قیمت هر امتیاز به تومان
   const REFERRER_COMMISSION = 5000 // پاداش معرف به ازای هر امتیاز
 
-  const generateTrackingCode = (date, transactions) => {
+  const generateTrackingCode = (date: string, transactions: Transaction[]) => {
     // Parse Persian date (YYYY/MM/DD format)
     const [year, month, day] = date.split("/").map(Number)
 
@@ -260,7 +260,7 @@ export default function LoanCreditAdmin() {
 
   const addSeller = () => {
     if (newSeller.name && newSeller.lastName && newSeller.phone && newSeller.creditAmount > 0) {
-      const seller = {
+      const seller: Seller = {
         id: Date.now().toString(),
         ...newSeller,
         remainingAmount: newSeller.creditAmount,
@@ -281,7 +281,7 @@ export default function LoanCreditAdmin() {
   // اضافه کردن تابع برای افزودن خریدار جدید
   const addBuyer = () => {
     if (newBuyer.name && newBuyer.nationalId && newBuyer.phone && newBuyer.requestedAmount > 0) {
-      const buyer = {
+      const buyer: Buyer = {
         id: Date.now().toString(),
         name: newBuyer.name,
         nationalId: newBuyer.nationalId,
@@ -313,7 +313,7 @@ export default function LoanCreditAdmin() {
     if (!seller) return
 
     let remainingSellerCredit = seller.remainingAmount
-    const newTransactions = []
+    const newTransactions: Transaction[] = []
 
     // ایجاد معامله جداگانه برای هر خریدار
     selectedBuyerObjects.forEach((buyer, index) => {
@@ -334,7 +334,7 @@ export default function LoanCreditAdmin() {
 با تشکر از همکاری شما
 مجموعه رسانت`
 
-        const transaction = {
+        const transaction: Transaction = {
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
           sellerId: selectedSeller,
           buyerIds: [buyer.id],
@@ -407,7 +407,7 @@ export default function LoanCreditAdmin() {
   const pendingPayments = transactions.filter((t) => t.status === "pending_payment").length
 
   // Group pending payments by seller phone
-  const getPaymentGroups = () => {
+  const getPaymentGroups = (): PaymentGroup[] => {
     const pendingTransactions = transactions.filter((t) => t.status === "pending_payment")
     const groupedBySeller = pendingTransactions.reduce(
       (acc, transaction) => {
@@ -418,7 +418,7 @@ export default function LoanCreditAdmin() {
         acc[key].push(transaction)
         return acc
       },
-      {} ,
+      {} as Record<string, Transaction[]>,
     )
 
     return Object.entries(groupedBySeller).map(([sellerPhone, transactions]) => {
@@ -441,7 +441,7 @@ export default function LoanCreditAdmin() {
           })
           return acc
         },
-        {} ,
+        {} as Record<string, Transaction[]>,
       )
 
       const referrerPayments = Object.entries(referrerGroups).map(([referrerName, referrerTransactions]) => ({
@@ -461,7 +461,7 @@ export default function LoanCreditAdmin() {
     })
   }
 
-  const generatePaymentMessage = (group, isReferrer = false, referrerName) => {
+  const generatePaymentMessage = (group: PaymentGroup, isReferrer = false, referrerName?: string) => {
     if (isReferrer && referrerName) {
       const referrerPayment = group.referrerPayments.find((rp) => rp.referrerName === referrerName)
       if (!referrerPayment) return ""
@@ -501,13 +501,13 @@ ${group.transactions
 مجموعه رسانت`
   }
 
-  const handlePaymentComplete = (group) => {
+  const handlePaymentComplete = (group: PaymentGroup) => {
     const currentTime = new Date()
     const updatedTransactions = transactions.map((t) => {
       if (group.transactions.some((gt) => gt.id === t.id)) {
         return {
           ...t,
-          status: "completed" ,
+          status: "completed" as const,
           history: [
             ...t.history,
             {
@@ -552,8 +552,8 @@ ${group.transactions
   })
 
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
-    let aValue = a[sortField as keyof Transaction]
-    let bValue = b[sortField as keyof Transaction]
+    let aValue: any = a[sortField as keyof Transaction]
+    let bValue: any = b[sortField as keyof Transaction]
 
     if (sortField === "date") {
       aValue = new Date(a.date.replace(/\//g, "-"))
