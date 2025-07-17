@@ -30,7 +30,7 @@ interface Transaction {
   sellerId: string
   buyerIds: string[]
   amount: number
-  status: "pending_transfer" | "transferred" | "pending_payment" | "completed" | "cancelled"
+  status: "pending_transfer" | "transferred" | "pending_payment" | "completed" | "cancelled"| "paid"
   date: string
   sellerName: string
   buyerNames: string[]
