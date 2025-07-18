@@ -621,6 +621,7 @@ ${group.transactions
 
   return (
     <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
+      
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">مدیریت خرید و فروش امتیاز وام</h1>
@@ -1887,6 +1888,7 @@ ${group.transactions
             </div>
           </div>
         )}
+        
       </div>
       <style jsx global>{`
   @media print {
