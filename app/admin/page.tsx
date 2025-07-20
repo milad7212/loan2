@@ -234,7 +234,6 @@ export default function LoanCreditAdmin() {
     phone: "",
     referrer: "",
     requestedAmount: 0,
-    description: "",
   })
 
   const CREDIT_PRICE = 135000 // قیمت هر امتیاز به تومان
@@ -1888,7 +1887,88 @@ ${group.transactions
             </div>
           </div>
         )}
-        
+        {/* Add Buyer Modal */}
+        {isAddBuyerModalOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setIsAddBuyerModalOpen(false)}
+          >
+            <div
+              className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">افزودن خریدار جدید</h3>
+                <button
+                  onClick={() => setIsAddBuyerModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="نام و نام خانوادگی"
+                  value={newBuyer.name}
+                  onChange={(e) => setNewBuyer({ ...newBuyer, name: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="text"
+                  placeholder="کد ملی"
+                  value={newBuyer.nationalId}
+                  onChange={(e) => setNewBuyer({ ...newBuyer, nationalId: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="text"
+                  placeholder="شماره تماس"
+                  value={newBuyer.phone}
+                  onChange={(e) => setNewBuyer({ ...newBuyer, phone: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="text"
+                  placeholder="معرف (اختیاری)"
+                  value={newBuyer.referrer}
+                  onChange={(e) => setNewBuyer({ ...newBuyer, referrer: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="number"
+                  placeholder="مقدار امتیاز درخواستی"
+                  value={newBuyer.requestedAmount || ""}
+                  onChange={(e) => setNewBuyer({ ...newBuyer, requestedAmount: Number.parseInt(e.target.value) || 0 })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <textarea
+                  placeholder="توضیحات (اختیاری)"
+                  value={newBuyer.description}
+                  onChange={(e) => setNewBuyer({ ...newBuyer, description: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end mt-6">
+                <button
+                  onClick={addBuyer}
+                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+                >
+                  افزودن خریدار
+                </button>
+                <button
+                  onClick={() => setIsAddBuyerModalOpen(false)}
+                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  انصراف
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <style jsx global>{`
   @media print {
