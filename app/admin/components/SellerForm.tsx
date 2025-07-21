@@ -59,7 +59,7 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6 h-full">
       <h2 className="text-xl font-semibold mb-4">اضافه کردن فروشنده جدید</h2>
       <p className="text-sm text-gray-500 mb-4">اطلاعات فروشنده جدید را برای اضافه کردن به لیست وارد کنید.</p>
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import moment from "jalali-moment";
 import InfoCard from "./components/InfoCard";
 import SellerForm from "./components/SellerForm";
 import BuyerList from "./components/BuyerList";
@@ -549,9 +550,14 @@ export default function LoanCreditAdmin() {
     <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            مدیریت خرید و فروش امتیاز وام
-          </h1>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              مدیریت خرید و فروش امتیاز وام
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {moment().locale("fa").format("dddd، D MMMM YYYY")}
+            </p>
+          </div>
           <button
             onClick={() => setIsPaymentModalOpen(true)}
             className="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"
@@ -589,10 +595,10 @@ export default function LoanCreditAdmin() {
         </div>
 
         <div className="flex flex-wrap lg:flex-nowrap gap-8">
-          <div className="w-full lg:w-1/2">
+          <div className="w-full lg:w-1/2 flex flex-col">
             <SellerForm addSeller={addSeller} />
           </div>
-          <div className="w-full lg:w-1/2">
+          <div className="w-full lg:w-1/2 flex flex-col">
             <BuyerList
               buyers={buyers}
               openAddBuyerModal={() => setIsAddBuyerModalOpen(true)}
@@ -805,6 +811,34 @@ export default function LoanCreditAdmin() {
           title="تغییر وضعیت معامله"
         >
           <div className="space-y-4">
+            {selectedStatusTransaction.history && (
+              <div className="border border-gray-200 rounded-lg p-4 max-h-40 overflow-y-auto">
+                <h4 className="font-semibold mb-2">تاریخچه وضعیت</h4>
+                <ul className="space-y-2 text-sm">
+                  {selectedStatusTransaction.history.map((h, index) => (
+                    <li key={index} className="border-b pb-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{h.status}</span>
+                        <span className="text-gray-500">
+                          {h.date} - {h.time}
+                        </span>
+                      </div>
+                      <p className="text-gray-600">{h.description}</p>
+                      {h.image && (
+                        <a
+                          href={h.image}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:underline"
+                        >
+                          مشاهده تصویر
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <select
               value={selectedStatusTransaction.status}
               onChange={(e) =>

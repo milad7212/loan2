@@ -39,7 +39,7 @@ const BuyerList: React.FC<BuyerListProps> = ({ buyers, openAddBuyerModal, status
   )
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6 h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">لیست خریداران</h2>
         <button

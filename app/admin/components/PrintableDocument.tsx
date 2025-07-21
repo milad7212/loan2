@@ -29,15 +29,16 @@ interface PrintableDocumentProps {
   transaction: Transaction
 }
 
-const PrintableDocument: React.FC<PrintableDocumentProps> = ({ transaction }) => {
+const DocumentBody: React.FC<{ transaction: Transaction; copyType: string }> = ({ transaction, copyType }) => {
   const CREDIT_PRICE = 135000
   const totalAmount = transaction.amount * CREDIT_PRICE
 
   return (
-    <div className="document p-4" dir="rtl">
+    <div className="document-page">
       <div className="header text-center mb-4 pb-2 border-b-2 border-gray-800">
         <h1 className="text-2xl font-bold">رسید انتقال امتیاز وام</h1>
         <p className="text-sm text-gray-600">تاریخ صدور: {new Date().toLocaleDateString("fa-IR")}</p>
+        <p className="text-lg font-semibold mt-2">{copyType}</p>
       </div>
 
       <div className="content my-4">
@@ -128,6 +129,16 @@ const PrintableDocument: React.FC<PrintableDocumentProps> = ({ transaction }) =>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+const PrintableDocument: React.FC<PrintableDocumentProps> = ({ transaction }) => {
+  return (
+    <div className="document p-4" dir="rtl">
+      <DocumentBody transaction={transaction} copyType="نسخه فروشگاه" />
+      <div className="page-break"></div>
+      <DocumentBody transaction={transaction} copyType="نسخه مشتری" />
     </div>
   )
 }

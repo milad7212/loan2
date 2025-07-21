@@ -119,8 +119,20 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
         <button
           onClick={exportToExcel}
           className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm"
+          title="خروجی اکسل"
         >
-          خروجی اکسل
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 9.293a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
         </button>
       </div>
 
@@ -225,7 +237,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                 <td className="py-2 px-2 flex gap-2">
                   <button
                     onClick={() => openModal(transaction)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer"
                     title="مشاهده پیام"
                   >
                     <svg
@@ -244,7 +256,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                   </button>
                   <button
                     onClick={() => openPrintModal(transaction)}
-                    className="text-green-600 hover:text-green-800"
+                    className="text-green-600 hover:text-green-800 cursor-pointer"
                     title="چاپ سند"
                   >
                     <svg
@@ -262,7 +274,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                   </button>
                   <button
                     onClick={() => openStatusModal(transaction)}
-                    className="text-orange-600 hover:text-orange-800"
+                    className="text-orange-600 hover:text-orange-800 cursor-pointer"
                     title="تغییر وضعیت"
                     disabled={transaction.status === "completed" || transaction.status === "cancelled"}
                   >
