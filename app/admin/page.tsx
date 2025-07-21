@@ -7,6 +7,7 @@ import BuyerList from "./components/BuyerList"
 import TransactionMatching from "./components/TransactionMatching"
 import TransactionHistory from "./components/TransactionHistory"
 import Modal from "./components/Modal"
+import PrintableDocument from "./components/PrintableDocument"
 
 // Interfaces (keep them in the main page or move to a separate types file)
 interface Buyer {
@@ -672,7 +673,7 @@ export default function LoanCreditAdmin() {
             </button>
           </div>
           <div id="print-content" className="bg-white" style={{ fontFamily: "Tahoma, Arial, sans-serif" }}>
-            {/* Print content remains the same */}
+            <PrintableDocument transaction={selectedPrintTransaction} />
           </div>
         </Modal>
       )}
