@@ -179,7 +179,14 @@ export default function LoanCreditAdmin() {
    * @returns A unique tracking code.
    */
   const generateTrackingCode = (date: string, transactions: Transaction[]) => {
-    const [year, month, day] = date.split("/").map(Number)
+    const dateParts = date.split("/")
+    if (dateParts.length !== 3) {
+      return "NaN"
+    }
+    const [year, month, day] = dateParts.map(Number)
+    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+      return "NaN"
+    }
     const yearDigit = year % 100
     const monthStr = month.toString().padStart(2, "0")
     const dayStr = day.toString().padStart(2, "0")
@@ -355,6 +362,8 @@ export default function LoanCreditAdmin() {
 
     setSelectedSeller("")
     setSelectedBuyers([])
+    setTransactionError("")
+    alert("تراکنش با موفقیت ایجاد شد.")
   }
 
   /**
@@ -766,7 +775,87 @@ export default function LoanCreditAdmin() {
 
       {isPaymentModalOpen && (
         <Modal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} title="پرداخت‌های در انتظار">
-          {/* Payment modal content remains the same */}
+          <div className="space-y-6">
+            {getPaymentGroups().length > 0 ? (
+              getPaymentGroups().map((group, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <p className="font-semibold text-lg">{group.sellerName}</p>
+                      <p className="text-sm text-gray-500">{group.sellerPhone}</p>
+                      <p className="text-sm text-gray-500">{group.sellerCardNumber}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold text-lg text-green-600">
+                        {group.totalAmount.toLocaleString("fa-IR")} تومان
+                      </p>
+                      <p className="text-sm text-gray-500">مجموع</p>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h4 className="font-semibold mb-2">جزئیات پرداخت:</h4>
+                    <ul className="space-y-2 text-sm">
+                      {group.transactions.map((t) => (
+                        <li key={t.id} className="flex justify-between">
+                          <span>
+                            {t.buyerNames.join(", ")} ({t.amount} امتیاز)
+                          </span>
+                          <span>{(t.amount * CREDIT_PRICE).toLocaleString("fa-IR")} تومان</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {group.referrerPayments.length > 0 && (
+                    <div className="border-t pt-4 mt-4">
+                      <h4 className="font-semibold mb-2">پورسانت معرف:</h4>
+                      <ul className="space-y-2 text-sm">
+                        {group.referrerPayments.map((p, i) => (
+                          <li key={i} className="flex justify-between">
+                            <span>{p.referrerName}</span>
+                            <span className="text-blue-600">{p.totalAmount.toLocaleString("fa-IR")} تومان</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="mt-4 flex flex-col gap-2">
+                    <textarea
+                      placeholder="توضیحات (اختیاری)"
+                      onChange={(e) => setPaymentDescription(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={2}
+                    ></textarea>
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const reader = new FileReader()
+                          reader.onload = (event) => {
+                            setPaymentImage(event.target?.result as string)
+                          }
+                          reader.readAsDataURL(e.target.files[0])
+                        }
+                      }}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 justify-end mt-4">
+                    <button
+                      onClick={() => handlePaymentComplete(group)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                    >
+                      پرداخت شد
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">در حال حاضر پرداخت در انتظاری وجود ندارد.</p>
+            )}
+          </div>
         </Modal>
       )}
     </div>
