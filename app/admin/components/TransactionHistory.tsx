@@ -1,0 +1,228 @@
+import React from "react"
+
+interface Transaction {
+  id: string
+  sellerId: string
+  buyerIds: string[]
+  amount: number
+  status: "pending_transfer" | "transferred" | "pending_payment" | "completed" | "cancelled" | "paid"
+  date: string
+  sellerName: string
+  buyerNames: string[]
+  sellerPhone: string
+  sellerNationalId: string
+  buyerPhones: string[]
+  buyerNationalIds: string[]
+  buyerReferrers: (string | undefined)[]
+  trackingCode: string
+  message: string
+  history: Array<{
+    status: string
+    description: string
+    date: string
+    time: string
+    image?: string
+  }>
+}
+
+interface TransactionHistoryProps {
+  transactions: Transaction[]
+  openModal: (transaction: Transaction) => void
+  openPrintModal: (transaction: Transaction) => void
+  openStatusModal: (transaction: Transaction) => void
+  searchTerm: string
+  setSearchTerm: (term: string) => void
+  statusFilter: string
+  setStatusFilter: (status: string) => void
+  sortField: string
+  setSortField: (field: string) => void
+  sortDirection: "asc" | "desc"
+  setSortDirection: (direction: "asc" | "desc") => void
+}
+
+/**
+ * A component to display the history of transactions.
+ */
+const TransactionHistory: React.FC<TransactionHistoryProps> = ({
+  transactions,
+  openModal,
+  openPrintModal,
+  openStatusModal,
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+  sortField,
+  setSortField,
+  sortDirection,
+  setSortDirection,
+}) => {
+  const filteredTransactions = transactions.filter((transaction) => {
+    const matchesSearch =
+      transaction.sellerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction.buyerNames.some((name) => name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      transaction.trackingCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction.sellerPhone.includes(searchTerm) ||
+      transaction.buyerPhones.some((phone) => phone.includes(searchTerm)) ||
+      transaction.sellerNationalId.includes(searchTerm) ||
+      transaction.buyerNationalIds.some((id) => id.includes(searchTerm)) ||
+      transaction.date.includes(searchTerm) ||
+      transaction.buyerReferrers.some((referrer) => referrer?.toLowerCase().includes(searchTerm.toLowerCase()))
+
+    const matchesStatus = statusFilter === "all" || transaction.status === statusFilter
+
+    return matchesSearch && matchesStatus
+  })
+
+  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+    let aValue: any = a[sortField as keyof Transaction]
+    let bValue: any = b[sortField as keyof Transaction]
+
+    if (sortField === "date") {
+      aValue = new Date(a.date.replace(/\//g, "-"))
+      bValue = new Date(b.date.replace(/\//g, "-"))
+    }
+
+    if (sortDirection === "asc") {
+      return aValue > bValue ? 1 : -1
+    } else {
+      return aValue < bValue ? 1 : -1
+    }
+  })
+  return (
+    <div className="bg-white rounded-lg shadow p-6 mt-8">
+      <h2 className="text-xl font-semibold mb-4">تاریخچه معاملات</h2>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="جستجو در معاملات (نام، کد ملی، شماره تماس، کد پیگیری، تاریخ، معرف)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="flex gap-2">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">همه وضعیت‌ها</option>
+            <option value="pending_transfer">در انتظار انتقال وام</option>
+            <option value="transferred">وام منتقل شد</option>
+            <option value="pending_payment">در انتظار پرداخت وجه</option>
+            <option value="completed">تسویه شده</option>
+            <option value="cancelled">لغو</option>
+          </select>
+          <select
+            value={sortField}
+            onChange={(e) => setSortField(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="date">تاریخ</option>
+            <option value="sellerName">فروشنده</option>
+            <option value="amount">مقدار</option>
+            <option value="status">وضعیت</option>
+          </select>
+          <button
+            onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")}
+            className="border border-gray-300 rounded-md px-3 py-2 hover:bg-gray-50"
+          >
+            {sortDirection === "asc" ? "↑" : "↓"}
+          </button>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="text-right py-2 px-2">تاریخ</th>
+              <th className="text-right py-2 px-2">فروشنده</th>
+              <th className="text-right py-2 px-2">کد ملی فروشنده</th>
+              <th className="text-right py-2 px-2">موبایل فروشنده</th>
+              <th className="text-right py-2 px-2">خریدار</th>
+              <th className="text-right py-2 px-2">کد ملی خریدار</th>
+              <th className="text-right py-2 px-2">موبایل خریدار</th>
+              <th className="text-right py-2 px-2">معرف</th>
+              <th className="text-right py-2 px-2">مقدار</th>
+              <th className="text-right py-2 px-2">کد پیگیری</th>
+              <th className="text-right py-2 px-2">وضعیت</th>
+              <th className="text-right py-2 px-2">عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedTransactions.map((transaction) => (
+              <tr key={transaction.id} className="border-b hover:bg-gray-50">
+                <td className="py-2 px-2">{transaction.date}</td>
+                <td className="py-2 px-2">{transaction.sellerName}</td>
+                <td className="py-2 px-2">{transaction.sellerNationalId}</td>
+                <td className="py-2 px-2">{transaction.sellerPhone}</td>
+                <td className="py-2 px-2">{transaction.buyerNames.join(", ")}</td>
+                <td className="py-2 px-2">{transaction.buyerNationalIds.join(", ")}</td>
+                <td className="py-2 px-2">{transaction.buyerPhones.join(", ")}</td>
+                <td className="py-2 px-2">{transaction.buyerReferrers.filter(Boolean).join(", ") || "-"}</td>
+                <td className="py-2 px-2">{transaction.amount} امتیاز</td>
+                <td className="py-2 px-2 font-mono text-xs">{transaction.trackingCode}</td>
+                <td className="py-2 px-2">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      transaction.status === "completed"
+                        ? "bg-green-100 text-green-800"
+                        : transaction.status === "pending_payment"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : transaction.status === "transferred"
+                        ? "bg-blue-100 text-blue-800"
+                        : transaction.status === "cancelled"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {transaction.status === "completed"
+                      ? "تسویه شده"
+                      : transaction.status === "pending_payment"
+                      ? "در انتظار پرداخت وجه"
+                      : transaction.status === "transferred"
+                      ? "وام منتقل شد"
+                      : transaction.status === "cancelled"
+                      ? "لغو"
+                      : "در انتظار انتقال وام"}
+                  </span>
+                </td>
+                <td className="py-2 px-2">
+                  <button
+                    onClick={() => openModal(transaction)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors text-xs"
+                  >
+                    مشاهده پیام
+                  </button>
+                  <button
+                    onClick={() => openPrintModal(transaction)}
+                    className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors text-xs ml-2"
+                  >
+                    چاپ سند
+                  </button>
+                  <button
+                    onClick={() => openStatusModal(transaction)}
+                    className="bg-orange-600 text-white px-3 py-1 rounded-md hover:bg-orange-700 transition-colors text-xs ml-2"
+                    disabled={transaction.status === "completed" || transaction.status === "cancelled"}
+                  >
+                    تغییر وضعیت
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {sortedTransactions.length === 0 && (
+          <div className="text-center py-8 text-gray-500">هیچ معامله‌ای یافت نشد</div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default TransactionHistory
