@@ -191,25 +191,62 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                       : "در انتظار انتقال وام"}
                   </span>
                 </td>
-                <td className="py-2 px-2">
+                <td className="py-2 px-2 flex gap-2">
                   <button
                     onClick={() => openModal(transaction)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors text-xs"
+                    className="text-blue-600 hover:text-blue-800"
+                    title="مشاهده پیام"
                   >
-                    مشاهده پیام
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path
+                        fillRule="evenodd"
+                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </button>
                   <button
                     onClick={() => openPrintModal(transaction)}
-                    className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors text-xs ml-2"
+                    className="text-green-600 hover:text-green-800"
+                    title="چاپ سند"
                   >
-                    چاپ سند
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 4v3H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </button>
                   <button
                     onClick={() => openStatusModal(transaction)}
-                    className="bg-orange-600 text-white px-3 py-1 rounded-md hover:bg-orange-700 transition-colors text-xs ml-2"
+                    className="text-orange-600 hover:text-orange-800"
+                    title="تغییر وضعیت"
                     disabled={transaction.status === "completed" || transaction.status === "cancelled"}
                   >
-                    تغییر وضعیت
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7a1 1 0 011.414-1.414L10 14.586l6.293-6.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </button>
                 </td>
               </tr>

@@ -179,7 +179,7 @@ export default function LoanCreditAdmin() {
    */
   const generateTrackingCode = (date: string, transactions: Transaction[]) => {
     const [year, month, day] = date.split("/").map(Number)
-    const yearDigit = year % 10
+    const yearDigit = year % 100
     const monthStr = month.toString().padStart(2, "0")
     const dayStr = day.toString().padStart(2, "0")
     const sameDate = transactions.filter((t) => t.date === date).length
@@ -498,11 +498,16 @@ export default function LoanCreditAdmin() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <InfoCard title="تعداد خریداران" value={totalBuyers} color="text-blue-600" />
           <InfoCard title="کل تقاضا (امتیاز)" value={totalDemand} color="text-green-600" />
           <InfoCard title="معاملات انجام شده" value={completedTransactions} color="text-purple-600" />
           <InfoCard title="در انتظار پرداخت" value={pendingPayments} color="text-red-600" />
+          <InfoCard
+            title="قیمت روز"
+            value={`${CREDIT_PRICE.toLocaleString("fa-IR")} تومان`}
+            color="text-yellow-600"
+          />
         </div>
 
         <div className="flex flex-wrap lg:flex-nowrap gap-8">
@@ -679,7 +684,82 @@ export default function LoanCreditAdmin() {
 
       {isStatusModalOpen && selectedStatusTransaction && (
         <Modal isOpen={isStatusModalOpen} onClose={() => setIsStatusModalOpen(false)} title="تغییر وضعیت معامله">
-          {/* Status change modal content remains the same */}
+          <div className="space-y-4">
+            <select
+              value={selectedStatusTransaction.status}
+              onChange={(e) =>
+                setSelectedStatusTransaction({
+                  ...selectedStatusTransaction,
+                  status: e.target.value as Transaction["status"],
+                })
+              }
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="pending_transfer">در انتظار انتقال وام</option>
+              <option value="transferred">وام منتقل شد</option>
+              <option value="pending_payment">در انتظار پرداخت وجه</option>
+              <option value="completed">تسویه شده</option>
+              <option value="cancelled">لغو</option>
+            </select>
+            <textarea
+              placeholder="توضیحات (اختیاری)"
+              value={statusDescription}
+              onChange={(e) => setStatusDescription(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
+            />
+            <input
+              type="file"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  const reader = new FileReader()
+                  reader.onload = (event) => {
+                    setUploadedImage(event.target?.result as string)
+                  }
+                  reader.readAsDataURL(e.target.files[0])
+                }
+              }}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex gap-2 justify-end mt-6">
+            <button
+              onClick={() => {
+                const newHistoryEntry = {
+                  status: selectedStatusTransaction.status,
+                  description: statusDescription,
+                  date: new Date().toLocaleDateString("fa-IR"),
+                  time: new Date().toLocaleTimeString("fa-IR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  image: uploadedImage || undefined,
+                }
+                const updatedTransactions = transactions.map((t) =>
+                  t.id === selectedStatusTransaction.id
+                    ? {
+                        ...t,
+                        status: selectedStatusTransaction.status,
+                        history: [...t.history, newHistoryEntry],
+                      }
+                    : t,
+                )
+                setTransactions(updatedTransactions)
+                setIsStatusModalOpen(false)
+                setStatusDescription("")
+                setUploadedImage(null)
+              }}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+            >
+              ذخیره تغییرات
+            </button>
+            <button
+              onClick={() => setIsStatusModalOpen(false)}
+              className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+            >
+              انصراف
+            </button>
+          </div>
         </Modal>
       )}
 
