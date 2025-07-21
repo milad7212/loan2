@@ -4,14 +4,14 @@ const CREDIT_PRICE = 135000
 
 interface Seller {
   id: string
-  name: string
-  lastName: string
+  fullName: string
   phone: string
   accountNumber: string
   cardNumber: string
   creditAmount: number
   remainingAmount: number
   status: "active" | "completed"
+  description?: string
 }
 
 interface Buyer {
@@ -84,57 +84,48 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="font-medium mb-3">انتخاب فروشنده</h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2">
             {sellers
               .filter((s) => s.status === "active")
               .map((seller) => (
-                <label key={seller.id} className="flex items-center space-x-3 space-x-reverse">
-                  <input
-                    type="radio"
-                    name="seller"
-                    value={seller.id}
-                    checked={selectedSeller === seller.id}
-                    onChange={(e) => setSelectedSeller(e.target.value)}
-                    className="text-blue-600"
-                  />
-                  <div className="flex-1">
-                    <div className="font-medium">
-                      {seller.name} {seller.lastName}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {seller.phone} | باقیمانده: {seller.remainingAmount} امتیاز
-                    </div>
-                  </div>
-                </label>
+                <div
+                  key={seller.id}
+                  onClick={() => setSelectedSeller(seller.id)}
+                  className={`p-4 rounded-lg border-2 cursor-pointer ${
+                    selectedSeller === seller.id ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
+                  }`}
+                >
+                  <div className="font-semibold">{seller.fullName}</div>
+                  <div className="text-sm text-gray-600">{seller.phone}</div>
+                  <div className="text-sm text-green-600 mt-2">موجودی: {seller.remainingAmount} امتیاز</div>
+                </div>
               ))}
           </div>
         </div>
 
         <div>
           <h3 className="font-medium mb-3">انتخاب خریداران</h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2">
             {buyers
               .filter((b) => b.remainingAmount > 0)
               .map((buyer) => (
-                <label key={buyer.id} className="flex items-center space-x-3 space-x-reverse">
-                  <input
-                    type="checkbox"
-                    value={buyer.id}
-                    checked={selectedBuyers.includes(buyer.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedBuyers([...selectedBuyers, buyer.id])
-                      } else {
-                        setSelectedBuyers(selectedBuyers.filter((id) => id !== buyer.id))
-                      }
-                    }}
-                    className="text-blue-600"
-                  />
-                  <div className="flex-1">
-                    <div className="font-medium">{buyer.name}</div>
-                    <div className="text-sm text-gray-600">نیاز: {buyer.remainingAmount} امتیاز</div>
-                  </div>
-                </label>
+                <div
+                  key={buyer.id}
+                  onClick={() => {
+                    if (selectedBuyers.includes(buyer.id)) {
+                      setSelectedBuyers(selectedBuyers.filter((id) => id !== buyer.id))
+                    } else {
+                      setSelectedBuyers([...selectedBuyers, buyer.id])
+                    }
+                  }}
+                  className={`p-4 rounded-lg border-2 cursor-pointer ${
+                    selectedBuyers.includes(buyer.id) ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
+                  }`}
+                >
+                  <div className="font-semibold">{buyer.name}</div>
+                  <div className="text-sm text-gray-600">{buyer.phone}</div>
+                  <div className="text-sm text-red-600 mt-2">نیاز: {buyer.remainingAmount} امتیاز</div>
+                </div>
               ))}
           </div>
         </div>
@@ -175,7 +166,7 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                     <div key={buyer.id} className="bg-white p-4 rounded border">
                       <div className="text-xs text-gray-500 mb-2">پیام #{index + 1}</div>
                       <div className="text-sm leading-relaxed" dir="rtl" id={`message-content-${buyer.id}`}>
-                        {seller?.name} {seller?.lastName} عزیز،
+                        {seller?.fullName} عزیز،
                         <br />
                         <br />
                         لطفاً تعداد {transferAmount} امتیاز وام را به نام {buyer.name} با کد ملی {buyer.nationalId} و
@@ -216,21 +207,33 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                         <button
                           onClick={() => {
                             const messageElement = document.getElementById(`message-content-${buyer.id}`)
-                            if (messageElement && navigator.share) {
+                            if (messageElement) {
                               const text = messageElement.innerText
-                              navigator
-                                .share({
-                                  title: `پیام انتقال امتیاز وام - ${buyer.name}`,
-                                  text: text,
-                                })
-                                .catch((err) => console.error(err))
-                            } else {
-                              alert("قابلیت اشتراک‌گذاری در این مرورگر پشتیبانی نمی‌شود")
+                              const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
+                              window.open(whatsappUrl, "_blank")
                             }
                           }}
-                          className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors text-xs"
+                          className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition-colors text-xs flex items-center gap-1"
                         >
-                          📤 اشتراک
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M22 12A10 10 0 0 0 12 2" />
+                            <path d="M22 12A10 10 0 0 1 12 22" />
+                            <path d="M12 2A10 10 0 0 0 2 12" />
+                            <path d="M12 22A10 10 0 0 1 2 12" />
+                            <path d="M15.5 8.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-6a.5.5 0 0 1 .5-.5h7z" />
+                            <path d="M17.5 10.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h11z" />
+                          </svg>
+                          واتس‌اپ
                         </button>
                       </div>
                     </div>

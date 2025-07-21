@@ -24,14 +24,14 @@ interface Buyer {
 
 interface Seller {
   id: string
-  name: string
-  lastName: string
+  fullName: string
   phone: string
   accountNumber: string
   cardNumber: string
   creditAmount: number
   remainingAmount: number
   status: "active" | "completed"
+  description?: string
 }
 
 interface Transaction {
@@ -103,8 +103,7 @@ export default function LoanCreditAdmin() {
   const [sellers, setSellers] = useState<Seller[]>([
     {
       id: "1",
-      name: "حسن",
-      lastName: "موسوی",
+      fullName: "حسن موسوی",
       phone: "09777888999",
       accountNumber: "1234567890",
       cardNumber: "6037 9977 1234 5678",
@@ -149,7 +148,7 @@ export default function LoanCreditAdmin() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [buyerStatusFilter, setBuyerStatusFilter] = useState<string>("all")
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false)
   const [selectedPrintTransaction, setSelectedPrintTransaction] = useState<Transaction | null>(null)
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
@@ -187,12 +186,12 @@ export default function LoanCreditAdmin() {
     if (isNaN(year) || isNaN(month) || isNaN(day)) {
       return "NaN"
     }
-    const yearDigit = year % 100
+    const yearStr = year.toString()
     const monthStr = month.toString().padStart(2, "0")
     const dayStr = day.toString().padStart(2, "0")
     const sameDate = transactions.filter((t) => t.date === date).length
     const sequenceNumber = (sameDate + 1).toString().padStart(3, "0")
-    return `${yearDigit}${monthStr}${dayStr}${sequenceNumber}`
+    return `${yearStr}${monthStr}${dayStr}${sequenceNumber}`
   }
 
   /**
@@ -285,7 +284,7 @@ export default function LoanCreditAdmin() {
         const currentDate = new Date().toLocaleDateString("fa-IR")
         const trackingCode = generateTrackingCode(currentDate, [...transactions, ...newTransactions.slice(0, index)])
 
-        const message = `${seller.name} ${seller.lastName} عزیز،
+        const message = `${seller.fullName} عزیز،
 
 لطفاً تعداد ${transferAmount} امتیاز وام را به نام ${buyer.name} با کد ملی ${buyer.nationalId} و شماره تماس ${buyer.phone} منتقل نمایید.
 
@@ -306,7 +305,7 @@ export default function LoanCreditAdmin() {
           amount: transferAmount,
           status: "pending_transfer",
           date: new Date().toLocaleDateString("fa-IR"),
-          sellerName: `${seller.name} ${seller.lastName}`,
+          sellerName: seller.fullName,
           buyerNames: [buyer.name],
           sellerPhone: seller.phone,
           sellerNationalId: seller.accountNumber,
@@ -525,7 +524,12 @@ export default function LoanCreditAdmin() {
             <SellerForm addSeller={addSeller} />
           </div>
           <div className="w-full lg:w-1/2">
-            <BuyerList buyers={buyers} openAddBuyerModal={() => setIsAddBuyerModalOpen(true)} />
+            <BuyerList
+              buyers={buyers}
+              openAddBuyerModal={() => setIsAddBuyerModalOpen(true)}
+              statusFilter={buyerStatusFilter}
+              setStatusFilter={setBuyerStatusFilter}
+            />
           </div>
         </div>
 

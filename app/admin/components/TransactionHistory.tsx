@@ -1,4 +1,5 @@
 import React from "react"
+import * as XLSX from "xlsx"
 
 interface Transaction {
   id: string
@@ -89,9 +90,39 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
       return aValue < bValue ? 1 : -1
     }
   })
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      sortedTransactions.map((t) => ({
+        تاریخ: t.date,
+        فروشنده: t.sellerName,
+        "کد ملی فروشنده": t.sellerNationalId,
+        "موبایل فروشنده": t.sellerPhone,
+        خریدار: t.buyerNames.join(", "),
+        "کد ملی خریدار": t.buyerNationalIds.join(", "),
+        "موبایل خریدار": t.buyerPhones.join(", "),
+        معرف: t.buyerReferrers.filter(Boolean).join(", ") || "-",
+        مقدار: t.amount,
+        "کد پیگیری": t.trackingCode,
+        وضعیت: t.status,
+      })),
+    )
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions")
+    XLSX.writeFile(workbook, "transactions.xlsx")
+  }
+
   return (
     <div className="bg-white rounded-lg shadow p-6 mt-8">
-      <h2 className="text-xl font-semibold mb-4">تاریخچه معاملات</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">تاریخچه معاملات</h2>
+        <button
+          onClick={exportToExcel}
+          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm"
+        >
+          خروجی اکسل
+        </button>
+      </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
         <div className="flex-1">

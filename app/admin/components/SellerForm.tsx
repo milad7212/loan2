@@ -7,19 +7,19 @@ const CREDIT_PRICE = 135000
 const formatCardNumber = (value: string) => {
   const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "")
   const matches = v.match(/.{1,4}/g)
-  return matches ? matches.join(" ") : value
+  return matches ? matches.join(" ") : ""
 }
 
 interface Seller {
   id: string
-  name: string
-  lastName: string
+  fullName: string
   phone: string
   accountNumber: string
   cardNumber: string
   creditAmount: number
   remainingAmount: number
   status: "active" | "completed"
+  description?: string
 }
 
 interface SellerFormProps {
@@ -31,29 +31,29 @@ interface SellerFormProps {
  */
 const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
   const [newSeller, setNewSeller] = useState({
-    name: "",
-    lastName: "",
+    fullName: "",
     phone: "",
     accountNumber: "",
     cardNumber: "",
     creditAmount: 0,
+    description: "",
   })
 
   const [error, setError] = useState("")
 
   const handleAddSeller = () => {
-    if (!newSeller.name || !newSeller.lastName || !newSeller.phone || newSeller.creditAmount <= 0) {
+    if (!newSeller.fullName || !newSeller.phone || newSeller.creditAmount <= 0) {
       setError("Please fill all required fields.")
       return
     }
     addSeller(newSeller)
     setNewSeller({
-      name: "",
-      lastName: "",
+      fullName: "",
       phone: "",
       accountNumber: "",
       cardNumber: "",
       creditAmount: 0,
+      description: "",
     })
     setError("")
   }
@@ -64,22 +64,13 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
       <p className="text-sm text-gray-500 mb-4">اطلاعات فروشنده جدید را برای اضافه کردن به لیست وارد کنید.</p>
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="نام"
-            value={newSeller.name}
-            onChange={(e) => setNewSeller({ ...newSeller, name: e.target.value })}
-            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="text"
-            placeholder="نام خانوادگی"
-            value={newSeller.lastName}
-            onChange={(e) => setNewSeller({ ...newSeller, lastName: e.target.value })}
-            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="نام و نام خانوادگی"
+          value={newSeller.fullName}
+          onChange={(e) => setNewSeller({ ...newSeller, fullName: e.target.value })}
+          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
         <input
           type="text"
           placeholder="شماره موبایل"
@@ -99,7 +90,7 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
           placeholder="شماره کارت"
           value={newSeller.cardNumber}
           onChange={(e) => setNewSeller({ ...newSeller, cardNumber: formatCardNumber(e.target.value) })}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ltr-input"
         />
         <input
           type="number"
@@ -107,6 +98,13 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
           value={newSeller.creditAmount || ""}
           onChange={(e) => setNewSeller({ ...newSeller, creditAmount: Number.parseInt(e.target.value) || 0 })}
           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <textarea
+          placeholder="توضیحات (اختیاری)"
+          value={newSeller.description}
+          onChange={(e) => setNewSeller({ ...newSeller, description: e.target.value })}
+          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={3}
         />
         {newSeller.creditAmount > 0 && (
           <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200 mb-4">
@@ -121,7 +119,7 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
         )}
         <button
           onClick={handleAddSeller}
-          disabled={!newSeller.name || !newSeller.lastName || !newSeller.phone || newSeller.creditAmount <= 0}
+          disabled={!newSeller.fullName || !newSeller.phone || newSeller.creditAmount <= 0}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
         >
           اضافه کردن فروشنده
