@@ -42,12 +42,6 @@ const BuyerList: React.FC<BuyerListProps> = ({ buyers, openAddBuyerModal, status
     <div className="bg-white rounded-lg shadow p-6 h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">لیست خریداران</h2>
-        <button
-          onClick={openAddBuyerModal}
-          className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors text-sm"
-        >
-          + افزودن خریدار جدید
-        </button>
       </div>
       <div className="flex gap-2 mb-4">
         {Object.entries(statusMap).map(([status, label]) => (

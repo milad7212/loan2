@@ -16,6 +16,8 @@ import {
   Landmark,
   BadgePercent,
   Wallet,
+  UserPlus,
+  Briefcase,
 } from "lucide-react";
 import InfoCard from "./components/InfoCard";
 import InfoCardSkeleton from "./components/InfoCardSkeleton";
@@ -199,6 +201,7 @@ export default function LoanCreditAdmin() {
   const [paymentDescription, setPaymentDescription] = useState("");
   const [paymentImage, setPaymentImage] = useState<string | null>(null);
   const [isAddBuyerModalOpen, setIsAddBuyerModalOpen] = useState(false);
+  const [isAddSellerModalOpen, setIsAddSellerModalOpen] = useState(false);
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
   const [newPrice, setNewPrice] = useState(creditPrice);
   const [newBuyer, setNewBuyer] = useState({
@@ -249,6 +252,7 @@ export default function LoanCreditAdmin() {
       status: "active",
     };
     setSellers([...sellers, seller]);
+    setIsAddSellerModalOpen(false);
   };
 
   const [buyerError, setBuyerError] = useState("");
@@ -622,12 +626,22 @@ export default function LoanCreditAdmin() {
               </Tooltip>
             </TooltipProvider>
 
-            <button
-              onClick={() => setIsPaymentModalOpen(true)}
-              className="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"
-            >
-              پرداخت‌های در انتظار ({pendingPayments})
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsAddSellerModalOpen(true)}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                <Briefcase className="h-4 w-4" />
+                افزودن فروشنده
+              </button>
+              <button
+                onClick={() => setIsAddBuyerModalOpen(true)}
+                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <UserPlus className="h-4 w-4" />
+                افزودن خریدار
+              </button>
+            </div>
           </div>
         </div>
 
@@ -671,7 +685,6 @@ export default function LoanCreditAdmin() {
 
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-8">
-            <SellerForm addSeller={addSeller} creditPrice={creditPrice} />
             <BuyerList
               buyers={buyers}
               openAddBuyerModal={() => setIsAddBuyerModalOpen(true)}
@@ -1133,6 +1146,15 @@ export default function LoanCreditAdmin() {
             انصراف
           </button>
         </div>
+      </Modal>
+
+      {/* Add Seller Modal */}
+      <Modal
+        isOpen={isAddSellerModalOpen}
+        onClose={() => setIsAddSellerModalOpen(false)}
+        title="افزودن فروشنده جدید"
+      >
+        <SellerForm addSeller={addSeller} creditPrice={creditPrice} />
       </Modal>
     </div>
   );
