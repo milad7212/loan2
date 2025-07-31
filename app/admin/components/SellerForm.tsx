@@ -2,8 +2,6 @@
 
 import React, { useState } from "react"
 
-const CREDIT_PRICE = 135000
-
 const formatCardNumber = (value: string) => {
   const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "")
   const matches = v.match(/.{1,4}/g)
@@ -24,12 +22,13 @@ interface Seller {
 
 interface SellerFormProps {
   addSeller: (seller: Omit<Seller, "id" | "remainingAmount" | "status">) => void
+  creditPrice: number
 }
 
 /**
  * A form for adding a new seller.
  */
-const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
+const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
   const [newSeller, setNewSeller] = useState({
     fullName: "",
     phone: "",
@@ -110,10 +109,10 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller }) => {
           <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200 mb-4">
             <div className="text-sm text-gray-600">ارزش کل امتیاز</div>
             <div className="text-2xl font-bold text-green-600">
-              {(newSeller.creditAmount * CREDIT_PRICE).toLocaleString("fa-IR")} تومان
+              {(newSeller.creditAmount * creditPrice).toLocaleString("fa-IR")} تومان
             </div>
             <div className="text-xs text-gray-500">
-              {newSeller.creditAmount} امتیاز × {CREDIT_PRICE.toLocaleString("fa-IR")} تومان
+              {newSeller.creditAmount} امتیاز × {creditPrice.toLocaleString("fa-IR")} تومان
             </div>
           </div>
         )}

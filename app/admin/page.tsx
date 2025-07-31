@@ -607,7 +607,7 @@ export default function LoanCreditAdmin() {
 
         <div className="flex flex-wrap lg:flex-nowrap gap-8">
           <div className="w-full lg:w-1/2 flex flex-col">
-            <SellerForm addSeller={addSeller} />
+            <SellerForm addSeller={addSeller} creditPrice={creditPrice} />
           </div>
           <div className="w-full lg:w-1/2 flex flex-col">
             <BuyerList
