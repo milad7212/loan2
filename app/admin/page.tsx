@@ -80,11 +80,11 @@ interface PaymentGroup {
 }
 
 // Constants
-const CREDIT_PRICE = 135000;
 const REFERRER_COMMISSION = 5000;
 
 export default function LoanCreditAdmin() {
   // State variables
+  const [creditPrice, setCreditPrice] = useState(135000);
   const [buyers, setBuyers] = useState<Buyer[]>([
     {
       id: "1",
@@ -171,6 +171,8 @@ export default function LoanCreditAdmin() {
   const [paymentDescription, setPaymentDescription] = useState("");
   const [paymentImage, setPaymentImage] = useState<string | null>(null);
   const [isAddBuyerModalOpen, setIsAddBuyerModalOpen] = useState(false);
+  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+  const [newPrice, setNewPrice] = useState(creditPrice);
   const [newBuyer, setNewBuyer] = useState({
     name: "",
     nationalId: "",
@@ -311,9 +313,9 @@ export default function LoanCreditAdmin() {
           buyer.nationalId
         } و شماره تماس ${buyer.phone} منتقل نمایید.
 
-مبلغ ${(transferAmount * CREDIT_PRICE).toLocaleString(
+مبلغ ${(transferAmount * creditPrice).toLocaleString(
           "fa-IR"
-        )} تومان (${transferAmount} امتیاز × ${CREDIT_PRICE.toLocaleString(
+        )} تومان (${transferAmount} امتیاز × ${creditPrice.toLocaleString(
           "fa-IR"
         )} تومان) پس از انجام انتقال و بررسی نهایی، به حساب شما واریز خواهد شد.
 
@@ -427,7 +429,7 @@ export default function LoanCreditAdmin() {
       ([sellerPhone, transactions]) => {
         const seller = sellers.find((s) => s.phone === sellerPhone);
         const totalAmount = transactions.reduce(
-          (sum, t) => sum + t.amount * CREDIT_PRICE,
+          (sum, t) => sum + t.amount * creditPrice,
           0
         );
 
@@ -503,6 +505,11 @@ export default function LoanCreditAdmin() {
     setSelectedPaymentGroup(null);
     setPaymentDescription("");
     setPaymentImage(null);
+  };
+
+  const handlePriceSave = () => {
+    setCreditPrice(newPrice);
+    setIsPriceModalOpen(false);
   };
 
   const handlePrint = () => {
@@ -589,8 +596,12 @@ export default function LoanCreditAdmin() {
           />
           <InfoCard
             title="قیمت روز"
-            value={`${CREDIT_PRICE.toLocaleString("fa-IR")} تومان`}
+            value={`${creditPrice.toLocaleString("fa-IR")} تومان`}
             color="text-yellow-600"
+            onEdit={() => {
+              setNewPrice(creditPrice);
+              setIsPriceModalOpen(true);
+            }}
           />
         </div>
 
@@ -956,7 +967,7 @@ export default function LoanCreditAdmin() {
                             {t.buyerNames.join(", ")} ({t.amount} امتیاز)
                           </span>
                           <span>
-                            {(t.amount * CREDIT_PRICE).toLocaleString("fa-IR")}{" "}
+                            {(t.amount * creditPrice).toLocaleString("fa-IR")}{" "}
                             تومان
                           </span>
                         </li>
@@ -1019,6 +1030,37 @@ export default function LoanCreditAdmin() {
           </div>
         </Modal>
       )}
+
+      {/* Price Edit Modal */}
+      <Modal
+        isOpen={isPriceModalOpen}
+        onClose={() => setIsPriceModalOpen(false)}
+        title="تغییر قیمت روز"
+      >
+        <div className="space-y-4">
+          <input
+            type="number"
+            placeholder="قیمت جدید"
+            value={newPrice || ""}
+            onChange={(e) => setNewPrice(Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="flex gap-2 justify-end mt-6">
+          <button
+            onClick={handlePriceSave}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+          >
+            ذخیره
+          </button>
+          <button
+            onClick={() => setIsPriceModalOpen(false)}
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+          >
+            انصراف
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
