@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import moment from "jalali-moment";
 import { useReferrers } from "./context/ReferrersContext";
 import InfoCard from "./components/InfoCard";
@@ -567,12 +568,19 @@ export default function LoanCreditAdmin() {
               {moment().locale("fa").format("dddd، D MMMM YYYY")}
             </p>
           </div>
-          <button
-            onClick={() => setIsPaymentModalOpen(true)}
-            className="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"
-          >
-            پرداخت‌های در انتظار ({pendingPayments})
-          </button>
+          <div className="flex gap-4">
+            <Link href="/admin/referrers">
+              <button className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                مدیریت معرف‌ها
+              </button>
+            </Link>
+            <button
+              onClick={() => setIsPaymentModalOpen(true)}
+              className="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"
+            >
+              پرداخت‌های در انتظار ({pendingPayments})
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
