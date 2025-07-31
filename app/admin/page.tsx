@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import moment from "jalali-moment";
+import { useReferrers } from "./context/ReferrersContext";
 import InfoCard from "./components/InfoCard";
 import SellerForm from "./components/SellerForm";
 import BuyerList from "./components/BuyerList";
@@ -83,6 +84,7 @@ interface PaymentGroup {
 const REFERRER_COMMISSION = 5000;
 
 export default function LoanCreditAdmin() {
+  const { referrers } = useReferrers();
   const [creditPrice, setCreditPrice] = useState(135000);
   // State variables
   const [buyers, setBuyers] = useState<Buyer[]>([
@@ -694,15 +696,20 @@ export default function LoanCreditAdmin() {
             }
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <input
-            type="text"
-            placeholder="معرف (اختیاری)"
+          <select
             value={newBuyer.referrer}
             onChange={(e) =>
               setNewBuyer({ ...newBuyer, referrer: e.target.value })
             }
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          >
+            <option value="">انتخاب معرف (اختیاری)</option>
+            {referrers.map((referrer) => (
+              <option key={referrer.id} value={referrer.name}>
+                {referrer.name}
+              </option>
+            ))}
+          </select>
           <input
             type="number"
             placeholder="مقدار امتیاز درخواستی"
