@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import moment from "jalali-moment";
 import { useReferrers } from "./context/ReferrersContext";
@@ -10,11 +10,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
+import {
+  Users,
+  CircleDollarSign,
+  Landmark,
+  BadgePercent,
+  Wallet,
+} from "lucide-react";
 import InfoCard from "./components/InfoCard";
+import InfoCardSkeleton from "./components/InfoCardSkeleton";
 import SellerForm from "./components/SellerForm";
 import BuyerList from "./components/BuyerList";
 import TransactionMatching from "./components/TransactionMatching";
 import TransactionHistory from "./components/TransactionHistory";
+import TransactionHistorySkeleton from "./components/TransactionHistorySkeleton";
 import Modal from "./components/Modal";
 import PrintableDocument from "./components/PrintableDocument";
 
@@ -93,70 +102,80 @@ const REFERRER_COMMISSION = 5000;
 export default function LoanCreditAdmin() {
   const { referrers } = useReferrers();
   const [creditPrice, setCreditPrice] = useState(135000);
+  const [loading, setLoading] = useState(true);
   // State variables
-  const [buyers, setBuyers] = useState<Buyer[]>([
-    {
-      id: "1",
-      name: "احمد محمدی",
-      phone: "09123456789",
-      nationalId: "1234567890",
-      referrer: "حسن کریمی",
-      requestedAmount: 100,
-      remainingAmount: 100,
-      status: "pending",
-    },
-    {
-      id: "2",
-      name: "فاطمه احمدی",
-      phone: "09987654321",
-      nationalId: "0987654321",
-      requestedAmount: 50,
-      remainingAmount: 20,
-      status: "partial",
-    },
-  ]);
+  const [buyers, setBuyers] = useState<Buyer[]>([]);
+  const [sellers, setSellers] = useState<Seller[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [sellers, setSellers] = useState<Seller[]>([
-    {
-      id: "1",
-      fullName: "حسن موسوی",
-      phone: "09777888999",
-      accountNumber: "1234567890",
-      cardNumber: "6037 9977 1234 5678",
-      creditAmount: 80,
-      remainingAmount: 80,
-      status: "active",
-    },
-  ]);
-
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: "1",
-      sellerId: "1",
-      buyerIds: ["2"],
-      amount: 30,
-      status: "pending_payment",
-      date: "1403/10/15",
-      sellerName: "حسن موسوی",
-      buyerNames: ["فاطمه احمدی"],
-      sellerPhone: "09777888999",
-      sellerNationalId: "1234567890",
-      buyerPhones: ["09987654321"],
-      buyerNationalIds: ["0987654321"],
-      buyerReferrers: [undefined],
-      trackingCode: "40415001",
-      message:
-        "حسن موسوی عزیز، لطفاً تعداد 30 امتیاز وام را به نام فاطمه احمدی با کد ملی 0987654321 و شماره تماس 09987654321 منتقل نمایید.",
-      history: [
+  useEffect(() => {
+    // Simulate data fetching
+    setTimeout(() => {
+      setBuyers([
         {
-          status: "در انتظار انتقال وام",
-          description: "معامله ایجاد شد",
-          date: "1403/10/15",
-          time: "14:30",
+          id: "1",
+          name: "احمد محمدی",
+          phone: "09123456789",
+          nationalId: "1234567890",
+          referrer: "حسن کریمی",
+          requestedAmount: 100,
+          remainingAmount: 100,
+          status: "pending",
         },
-      ],
-    },
-  ]);
+        {
+          id: "2",
+          name: "فاطمه احمدی",
+          phone: "09987654321",
+          nationalId: "0987654321",
+          requestedAmount: 50,
+          remainingAmount: 20,
+          status: "partial",
+        },
+      ]);
+      setSellers([
+        {
+          id: "1",
+          fullName: "حسن موسوی",
+          phone: "09777888999",
+          accountNumber: "1234567890",
+          cardNumber: "6037 9977 1234 5678",
+          creditAmount: 80,
+          remainingAmount: 80,
+          status: "active",
+        },
+      ]);
+      setTransactions([
+        {
+          id: "1",
+          sellerId: "1",
+          buyerIds: ["2"],
+          amount: 30,
+          status: "pending_payment",
+          date: "1403/10/15",
+          sellerName: "حسن موسوی",
+          buyerNames: ["فاطمه احمدی"],
+          sellerPhone: "09777888999",
+          sellerNationalId: "1234567890",
+          buyerPhones: ["09987654321"],
+          buyerNationalIds: ["0987654321"],
+          buyerReferrers: [undefined],
+          trackingCode: "40415001",
+          message:
+            "حسن موسوی عزیز، لطفاً تعداد 30 امتیاز وام را به نام فاطمه احمدی با کد ملی 0987654321 و شماره تماس 09987654321 منتقل نمایید.",
+          history: [
+            {
+              status: "در انتظار انتقال وام",
+              description: "معامله ایجاد شد",
+              date: "1403/10/15",
+              time: "14:30",
+            },
+          ],
+        },
+      ]);
+      setLoading(false);
+    }, 1500);
+  }, []);
+
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [selectedBuyers, setSelectedBuyers] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -613,42 +632,46 @@ export default function LoanCreditAdmin() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <InfoCard
-            title="تعداد خریداران"
-            value={totalBuyers}
-            color="text-blue-600"
-          />
-          <InfoCard
-            title="کل تقاضا (امتیاز)"
-            value={totalDemand}
-            color="text-green-600"
-          />
-          <InfoCard
-            title="معاملات انجام شده"
-            value={completedTransactions}
-            color="text-purple-600"
-          />
-          <InfoCard
-            title="در انتظار پرداخت"
-            value={pendingPayments}
-            color="text-red-600"
-          />
-          <InfoCard
-            title="قیمت روز"
-            value={`${creditPrice.toLocaleString("fa-IR")} تومان`}
-            color="text-yellow-600"
-            onEdit={() => {
-              setNewPrice(creditPrice);
-              setIsPriceModalOpen(true);
-            }}
-          />
+          {loading ? (
+            [...Array(5)].map((_, i) => <InfoCardSkeleton key={i} />)
+          ) : (
+            <>
+              <InfoCard
+                title="تعداد خریداران"
+                value={totalBuyers}
+                icon={Users}
+              />
+              <InfoCard
+                title="کل تقاضا (امتیاز)"
+                value={totalDemand}
+                icon={CircleDollarSign}
+              />
+              <InfoCard
+                title="معاملات انجام شده"
+                value={completedTransactions}
+                icon={Landmark}
+              />
+              <InfoCard
+                title="در انتظار پرداخت"
+                value={pendingPayments}
+                icon={Wallet}
+              />
+              <InfoCard
+                title="قیمت روز"
+                value={`${creditPrice.toLocaleString("fa-IR")} تومان`}
+                icon={BadgePercent}
+                onEdit={() => {
+                  setNewPrice(creditPrice);
+                  setIsPriceModalOpen(true);
+                }}
+              />
+            </>
+          )}
         </div>
 
-        <div className="flex flex-wrap lg:flex-nowrap gap-8">
-          <div className="w-full lg:w-1/2 flex flex-col">
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1 space-y-8">
             <SellerForm addSeller={addSeller} creditPrice={creditPrice} />
-          </div>
-          <div className="w-full lg:w-1/2 flex flex-col">
             <BuyerList
               buyers={buyers}
               openAddBuyerModal={() => setIsAddBuyerModalOpen(true)}
@@ -656,46 +679,52 @@ export default function LoanCreditAdmin() {
               setStatusFilter={setBuyerStatusFilter}
             />
           </div>
+          <div className="lg:col-span-2 space-y-8">
+            {loading ? (
+              <TransactionHistorySkeleton />
+            ) : (
+              <>
+                {sellers.length > 0 && (
+                  <TransactionMatching
+                    sellers={sellers}
+                    buyers={buyers}
+                    transactions={transactions}
+                    selectedSeller={selectedSeller}
+                    setSelectedSeller={setSelectedSeller}
+                    selectedBuyers={selectedBuyers}
+                    setSelectedBuyers={setSelectedBuyers}
+                    createTransaction={createTransaction}
+                    generateTrackingCode={generateTrackingCode}
+                    createTransactionError={transactionError}
+                  />
+                )}
+                <TransactionHistory
+                  transactions={transactions}
+                  openModal={(t) => {
+                    setSelectedTransaction(t);
+                    setIsModalOpen(true);
+                  }}
+                  openPrintModal={(t) => {
+                    setSelectedPrintTransaction(t);
+                    setIsPrintModalOpen(true);
+                  }}
+                  openStatusModal={(t) => {
+                    setSelectedStatusTransaction(t);
+                    setIsStatusModalOpen(true);
+                  }}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  statusFilter={buyerStatusFilter}
+                  setStatusFilter={setBuyerStatusFilter}
+                  sortField={sortField}
+                  setSortField={setSortField}
+                  sortDirection={sortDirection}
+                  setSortDirection={setSortDirection}
+                />
+              </>
+            )}
+          </div>
         </div>
-
-        {sellers.length > 0 && (
-          <TransactionMatching
-            sellers={sellers}
-            buyers={buyers}
-            transactions={transactions}
-            selectedSeller={selectedSeller}
-            setSelectedSeller={setSelectedSeller}
-            selectedBuyers={selectedBuyers}
-            setSelectedBuyers={setSelectedBuyers}
-            createTransaction={createTransaction}
-            generateTrackingCode={generateTrackingCode}
-            createTransactionError={transactionError}
-          />
-        )}
-
-        <TransactionHistory
-          transactions={transactions}
-          openModal={(t) => {
-            setSelectedTransaction(t);
-            setIsModalOpen(true);
-          }}
-          openPrintModal={(t) => {
-            setSelectedPrintTransaction(t);
-            setIsPrintModalOpen(true);
-          }}
-          openStatusModal={(t) => {
-            setSelectedStatusTransaction(t);
-            setIsStatusModalOpen(true);
-          }}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          statusFilter={buyerStatusFilter}
-          setStatusFilter={setBuyerStatusFilter}
-          sortField={sortField}
-          setSortField={setSortField}
-          sortDirection={sortDirection}
-          setSortDirection={setSortDirection}
-        />
       </div>
 
       {/* Modals */}
