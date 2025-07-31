@@ -83,8 +83,8 @@ interface PaymentGroup {
 const REFERRER_COMMISSION = 5000;
 
 export default function LoanCreditAdmin() {
-  // State variables
   const [creditPrice, setCreditPrice] = useState(135000);
+  // State variables
   const [buyers, setBuyers] = useState<Buyer[]>([
     {
       id: "1",
