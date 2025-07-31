@@ -4,6 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import moment from "jalali-moment";
 import { useReferrers } from "./context/ReferrersContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import InfoCard from "./components/InfoCard";
 import SellerForm from "./components/SellerForm";
 import BuyerList from "./components/BuyerList";
@@ -568,12 +574,35 @@ export default function LoanCreditAdmin() {
               {moment().locale("fa").format("dddd، D MMMM YYYY")}
             </p>
           </div>
-          <div className="flex gap-4">
-            <Link href="/admin/referrers">
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
-                مدیریت معرف‌ها
-              </button>
-            </Link>
+          <div className="flex items-center gap-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link href="/admin/referrers">
+                    <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-gray-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.184-1.268-.5-1.82a4.994 4.994 0 00-4.5-2.18h-2a4.994 4.994 0 00-4.5 2.18c-.316.552-.5 1.167-.5 1.82v2M17 20h-2M7 20H2v-2a3 3 0 015.356-1.857M7 7a4 4 0 118 0 4 4 0 01-8 0z"
+                        />
+                      </svg>
+                    </button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>مدیریت معرف‌ها</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
             <button
               onClick={() => setIsPaymentModalOpen(true)}
               className="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"
