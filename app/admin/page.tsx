@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "../../components/ui/tooltip";
 import InfoCard from "./components/InfoCard";
 import SellerForm from "./components/SellerForm";
 import BuyerList from "./components/BuyerList";
