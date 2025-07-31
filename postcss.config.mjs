@@ -1,5 +1,5 @@
 import tailwindcss from 'tailwindcss';
-import nesting from 'tailwindcss/nesting';
+import nesting from 'tailwindcss/nesting/index.js';
 import autoprefixer from 'autoprefixer';
 
 const config = {
