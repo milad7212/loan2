@@ -166,9 +166,35 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                     <p className="text-sm font-semibold text-gray-700 mb-2">
                       پیام برای {buyer.name}
                     </p>
-                    <p className="text-xs whitespace-pre-line leading-relaxed text-gray-600">
+                    <p
+                      id={`message-preview-${buyer.id}`}
+                      className="text-xs whitespace-pre-line leading-relaxed text-gray-600"
+                    >
                       {message}
                     </p>
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(message).then(() => {
+                            alert(`پیام ${buyer.name} کپی شد!`);
+                          });
+                        }}
+                        className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors text-xs"
+                      >
+                        📋 کپی
+                      </button>
+                      <button
+                        onClick={() => {
+                          const whatsappUrl = `https://wa.me/${
+                            selectedSellerInfo.phone
+                          }?text=${encodeURIComponent(message)}`;
+                          window.open(whatsappUrl, "_blank");
+                        }}
+                        className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition-colors text-xs flex items-center gap-1"
+                      >
+                        واتس‌اپ
+                      </button>
+                    </div>
                   </div>
                 );
               })}
