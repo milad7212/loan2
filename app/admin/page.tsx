@@ -242,6 +242,31 @@ export default function LoanCreditAdmin() {
     return `${datePrefix}${sequenceNumber}`;
   };
 
+  const generateMessage = (
+    seller: Seller,
+    buyer: Buyer,
+    transferAmount: number,
+    trackingCode: string
+  ) => {
+    return `${seller.fullName} عزیز،
+
+لطفاً تعداد ${transferAmount} امتیاز وام را به نام ${
+      buyer.name
+    } با کد ملی ${buyer.nationalId} و شماره تماس ${buyer.phone} منتقل نمایید.
+
+مبلغ ${(transferAmount * creditPrice).toLocaleString(
+      "fa-IR"
+    )} تومان (${transferAmount} امتیاز × ${creditPrice.toLocaleString(
+      "fa-IR"
+    )} تومان) پس از انجام انتقال و بررسی نهایی، به حساب شما واریز خواهد شد.
+
+کد پیگیری: ${trackingCode}
+(لطفاً این کد را جهت هرگونه پیگیری نزد خود نگه دارید.)
+
+با تشکر از همکاری شما
+مجموعه رسانت`;
+  };
+
   /**
    * Adds a new seller to the list of sellers.
    * @param sellerData The data of the new seller.
@@ -343,23 +368,7 @@ export default function LoanCreditAdmin() {
           ...newTransactions.slice(0, index),
         ]);
 
-        const message = `${seller.fullName} عزیز،
-
-لطفاً تعداد ${transferAmount} امتیاز وام را به نام ${buyer.name} با کد ملی ${
-          buyer.nationalId
-        } و شماره تماس ${buyer.phone} منتقل نمایید.
-
-مبلغ ${(transferAmount * creditPrice).toLocaleString(
-          "fa-IR"
-        )} تومان (${transferAmount} امتیاز × ${creditPrice.toLocaleString(
-          "fa-IR"
-        )} تومان) پس از انجام انتقال و بررسی نهایی، به حساب شما واریز خواهد شد.
-
-کد پیگیری: ${trackingCode}
-(لطفاً این کد را جهت هرگونه پیگیری نزد خود نگه دارید.)
-
-با تشکر از همکاری شما
-مجموعه رسانت`;
+        const message = generateMessage(seller, buyer, transferAmount, trackingCode);
 
         const transaction: Transaction = {
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -710,6 +719,7 @@ export default function LoanCreditAdmin() {
                 {sellers.length > 0 && (
                   <TransactionMatching
                     sellers={sellers}
+                    sellers={sellers}
                     buyers={buyers}
                     selectedSeller={selectedSeller}
                     setSelectedSeller={setSelectedSeller}
@@ -717,6 +727,9 @@ export default function LoanCreditAdmin() {
                     setSelectedBuyers={setSelectedBuyers}
                     createTransaction={createTransaction}
                     createTransactionError={transactionError}
+                    generateMessage={generateMessage}
+                    generateTrackingCode={generateTrackingCode}
+                    transactions={transactions}
                   />
                 )}
                 <TransactionHistory

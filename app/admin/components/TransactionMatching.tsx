@@ -1,4 +1,5 @@
 import React from "react";
+import moment from "jalali-moment";
 
 interface Seller {
   id: string;
@@ -23,6 +24,11 @@ interface Buyer {
   status: "pending" | "partial" | "completed";
 }
 
+interface Transaction {
+  id:string;
+  // other properties
+}
+
 interface TransactionMatchingProps {
   sellers: Seller[];
   buyers: Buyer[];
@@ -32,6 +38,17 @@ interface TransactionMatchingProps {
   setSelectedBuyers: (ids: string[]) => void;
   createTransaction: () => void;
   createTransactionError: string;
+  generateMessage: (
+    seller: Seller,
+    buyer: Buyer,
+    transferAmount: number,
+    trackingCode: string
+  ) => string;
+  generateTrackingCode: (
+    jalaliDate: string,
+    transactions: Transaction[]
+  ) => string;
+  transactions: Transaction[];
 }
 
 const TransactionMatching: React.FC<TransactionMatchingProps> = ({
@@ -43,6 +60,9 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
   setSelectedBuyers,
   createTransaction,
   createTransactionError,
+  generateMessage,
+  generateTrackingCode,
+  transactions,
 }) => {
   const selectedSellerInfo = sellers.find((s) => s.id === selectedSeller);
   const selectedBuyersInfo = buyers.filter((b) => selectedBuyers.includes(b.id));
@@ -73,7 +93,9 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                       : "border-gray-200 bg-white hover:border-blue-400"
                   }`}
                 >
-                  <div className="font-semibold text-gray-800">{seller.fullName}</div>
+                  <div className="font-semibold text-gray-800">
+                    {seller.fullName}
+                  </div>
                   <div className="text-sm text-gray-500">{seller.phone}</div>
                   <div className="text-sm text-green-600 mt-2 font-medium">
                     موجودی: {seller.remainingAmount.toLocaleString()} امتیاز
@@ -106,7 +128,9 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                       : "border-gray-200 bg-white hover:border-blue-400"
                   }`}
                 >
-                  <div className="font-semibold text-gray-800">{buyer.name}</div>
+                  <div className="font-semibold text-gray-800">
+                    {buyer.name}
+                  </div>
                   <div className="text-sm text-gray-500">{buyer.phone}</div>
                   <div className="text-sm text-red-600 mt-2 font-medium">
                     نیاز: {buyer.remainingAmount.toLocaleString()} امتیاز
@@ -117,20 +141,38 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
         </div>
       </div>
 
-      {selectedSeller && selectedBuyers.length > 0 && (
+      {selectedSellerInfo && selectedBuyersInfo.length > 0 && (
         <div className="mt-8 pt-6 border-t">
-          <div className="bg-gray-50 rounded-lg p-4 text-center">
-            <p className="text-gray-600">
-              مقدار قابل انتقال:{" "}
-              <span className="font-bold text-lg text-blue-600">
-                {transferableAmount.toLocaleString()}
-              </span>{" "}
-              امتیاز
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              (از موجودی {availableCredit.toLocaleString()} فروشنده و نیاز{" "}
-              {totalSelectedDemand.toLocaleString()} خریداران)
-            </p>
+          <div className="bg-gray-100 rounded-lg p-4">
+            <h3 className="font-medium text-lg mb-4">پیش‌نمایش پیام‌ها</h3>
+            <div className="space-y-4 max-h-60 overflow-y-auto">
+              {selectedBuyersInfo.map((buyer) => {
+                const transferAmount = Math.min(
+                  buyer.remainingAmount,
+                  selectedSellerInfo.remainingAmount
+                );
+                const trackingCode = generateTrackingCode(
+                  moment().locale("fa").format("YYYY/MM/DD"),
+                  transactions
+                );
+                const message = generateMessage(
+                  selectedSellerInfo,
+                  buyer,
+                  transferAmount,
+                  trackingCode
+                );
+                return (
+                  <div key={buyer.id} className="bg-white p-4 rounded-lg border">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                      پیام برای {buyer.name}
+                    </p>
+                    <p className="text-xs whitespace-pre-line leading-relaxed text-gray-600">
+                      {message}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {createTransactionError && (
