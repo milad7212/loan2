@@ -565,26 +565,34 @@ export default function LoanCreditAdmin() {
     const printWindow = window.open("", "_blank");
     if (printWindow && selectedPrintTransaction) {
       const content = document.getElementById("print-content")?.innerHTML;
+      const styles = Array.from(document.styleSheets)
+        .map((styleSheet) => {
+          try {
+            return Array.from(styleSheet.cssRules)
+              .map((rule) => rule.cssText)
+              .join("");
+          } catch (e) {
+            console.log("Could not read stylesheet rules", e);
+            return "";
+          }
+        })
+        .join("\n");
+
       printWindow.document.write(`
-      <html>
-        <head>
-          <title>سند تحویل - ${selectedPrintTransaction.trackingCode}</title>
-          <style>
-            body { font-family: 'Tahoma', Arial, sans-serif; direction: rtl; margin: 0; padding: 20px; }
-            .document { page-break-after: always; }
-            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-            .content { margin: 20px 0; }
-            .footer { margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; }
-            .signature-section { display: flex; justify-content: space-between; margin-top: 40px; }
-            .signature-box { border: 1px solid #333; padding: 20px; width: 200px; text-align: center; }
-            @media print { body { margin: 0; } }
-          </style>
-        </head>
-        <body>${content}</body>
-      </html>
-    `);
+        <html>
+          <head>
+            <title>سند تحویل - ${selectedPrintTransaction.trackingCode}</title>
+            <style>${styles}</style>
+          </head>
+          <body dir="rtl">${content}</body>
+        </html>
+      `);
       printWindow.document.close();
-      printWindow.print();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
     }
   };
 
@@ -912,12 +920,17 @@ export default function LoanCreditAdmin() {
               📄 دانلود PDF
             </button>
           </div>
-          <div
-            id="print-content"
-            className="bg-white"
-            style={{ fontFamily: "Tahoma, Arial, sans-serif" }}
-          >
-            <PrintableDocument transaction={selectedPrintTransaction} />
+          <div id="print-content" className="a4-page">
+            <div className="a4-container">
+              <PrintableDocument
+                transaction={selectedPrintTransaction}
+                copyType="فروشنده"
+              />
+              <PrintableDocument
+                transaction={selectedPrintTransaction}
+                copyType="خریدار"
+              />
+            </div>
           </div>
         </Modal>
       )}

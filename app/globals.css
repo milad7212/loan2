@@ -30,19 +30,33 @@ body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-
-  .document-page {
+  .a4-page {
     width: 210mm;
     height: 297mm;
     page-break-after: always;
-    padding: 1cm;
   }
-
-  .page-break {
-    page-break-before: always;
-  }
-
   .no-print {
     display: none;
   }
+}
+
+.a5-page {
+  background: white;
+  width: 148mm;
+  height: 210mm;
+  display: block;
+  margin: 0 auto;
+  padding: 20px;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.a4-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10mm;
+  align-items: center;
 }
