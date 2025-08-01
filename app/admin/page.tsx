@@ -641,6 +641,12 @@ export default function LoanCreditAdmin() {
                 <UserPlus className="h-4 w-4" />
                 افزودن خریدار
               </button>
+              <button
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"
+              >
+                پرداخت‌های در انتظار ({pendingPayments})
+              </button>
             </div>
           </div>
         </div>
