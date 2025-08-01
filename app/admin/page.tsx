@@ -221,21 +221,25 @@ export default function LoanCreditAdmin() {
    * @param transactions The list of existing transactions.
    * @returns A unique tracking code.
    */
-  const generateTrackingCode = (date: string, transactions: Transaction[]) => {
-    const dateParts = date.split("/");
-    if (dateParts.length !== 3) {
-      return "NaN";
-    }
-    const [year, month, day] = dateParts.map(Number);
-    if (isNaN(year) || isNaN(month) || isNaN(day)) {
-      return "NaN";
-    }
-    const yearStr = year.toString();
-    const monthStr = month.toString().padStart(2, "0");
-    const dayStr = day.toString().padStart(2, "0");
-    const sameDate = transactions.filter((t) => t.date === date).length;
-    const sequenceNumber = (sameDate + 1).toString().padStart(3, "0");
-    return `${yearStr}${monthStr}${dayStr}${sequenceNumber}`;
+  const generateTrackingCode = (
+    jalaliDate: string,
+    transactions: Transaction[]
+  ) => {
+    const m = moment(jalaliDate, "jYYYY/jMM/jDD");
+    const year = m.jYear();
+    const month = (m.jMonth() + 1).toString().padStart(2, "0");
+    const day = m.jDate().toString().padStart(2, "0");
+
+    const yearLastDigit = year.toString().slice(-1);
+
+    const datePrefix = `${yearLastDigit}${month}${day}`;
+
+    const sameDayTransactions = transactions.filter(
+      (t) => t.date === jalaliDate
+    ).length;
+    const sequenceNumber = (sameDayTransactions + 1).toString().padStart(3, "0");
+
+    return `${datePrefix}${sequenceNumber}`;
   };
 
   /**
