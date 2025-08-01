@@ -337,7 +337,7 @@ export default function LoanCreditAdmin() {
           buyer.remainingAmount,
           remainingSellerCredit
         );
-        const currentDate = new Date().toLocaleDateString("fa-IR");
+        const currentDate = moment().locale("fa").format("YYYY/MM/DD");
         const trackingCode = generateTrackingCode(currentDate, [
           ...transactions,
           ...newTransactions.slice(0, index),
@@ -367,7 +367,7 @@ export default function LoanCreditAdmin() {
           buyerIds: [buyer.id],
           amount: transferAmount,
           status: "pending_transfer",
-          date: new Date().toLocaleDateString("fa-IR"),
+          date: currentDate,
           sellerName: seller.fullName,
           buyerNames: [buyer.name],
           sellerPhone: seller.phone,
