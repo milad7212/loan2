@@ -997,6 +997,49 @@ export default function LoanCreditAdmin() {
           <div className="flex gap-2 justify-end mt-6">
             <button
               onClick={() => {
+                if (
+                  selectedStatusTransaction.status === "cancelled" &&
+                  selectedStatusTransaction
+                ) {
+                  // Revert buyer's remaining amount
+                  const updatedBuyers = buyers.map((buyer) => {
+                    if (
+                      selectedStatusTransaction.buyerIds.includes(buyer.id)
+                    ) {
+                      const newRemainingAmount =
+                        buyer.remainingAmount +
+                        selectedStatusTransaction.amount;
+                      return {
+                        ...buyer,
+                        remainingAmount: newRemainingAmount,
+                        status:
+                          newRemainingAmount >= buyer.requestedAmount
+                            ? "pending"
+                            : "partial",
+                      };
+                    }
+                    return buyer;
+                  });
+                  setBuyers(updatedBuyers);
+
+                  // Revert seller's remaining amount
+                  const updatedSellers = sellers.map((seller) => {
+                    if (
+                      seller.id === selectedStatusTransaction.sellerId
+                    ) {
+                      return {
+                        ...seller,
+                        remainingAmount:
+                          seller.remainingAmount +
+                          selectedStatusTransaction.amount,
+                        status: "active",
+                      };
+                    }
+                    return seller;
+                  });
+                  setSellers(updatedSellers);
+                }
+
                 const newHistoryEntry = {
                   status: selectedStatusTransaction.status,
                   description: statusDescription,
