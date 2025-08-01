@@ -711,13 +711,11 @@ export default function LoanCreditAdmin() {
                   <TransactionMatching
                     sellers={sellers}
                     buyers={buyers}
-                    transactions={transactions}
                     selectedSeller={selectedSeller}
                     setSelectedSeller={setSelectedSeller}
                     selectedBuyers={selectedBuyers}
                     setSelectedBuyers={setSelectedBuyers}
                     createTransaction={createTransaction}
-                    generateTrackingCode={generateTrackingCode}
                     createTransactionError={transactionError}
                   />
                 )}
