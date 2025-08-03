@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "jalali-moment";
-import { useReferrers } from "../context/ReferrersContext";
+import { supabase } from "../../../lib/supabaseClient";
 
 interface Referrer {
   id: string;
@@ -12,28 +12,58 @@ interface Referrer {
 }
 
 export default function ReferrersPage() {
-  const { referrers, addReferrer } = useReferrers();
+  const [referrers, setReferrers] = useState<Referrer[]>([]);
   const [newReferrer, setNewReferrer] = useState({
     name: "",
     phone: "",
     nationalId: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleAddReferrer = () => {
+  useEffect(() => {
+    fetchReferrers();
+  }, []);
+
+  const fetchReferrers = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("referrers").select("*");
+    if (error) {
+      console.error("Error fetching referrers:", error);
+      setError("خطا در دریافت لیست معرف‌ها");
+    } else {
+      setReferrers(data);
+    }
+    setLoading(false);
+  };
+
+  const handleAddReferrer = async () => {
     if (!newReferrer.name) {
       setError("نام معرف الزامی است.");
       return;
     }
 
-    addReferrer({
-      name: newReferrer.name,
-      phone: newReferrer.phone || undefined,
-      nationalId: newReferrer.nationalId || undefined,
-    });
+    const { data, error } = await supabase
+      .from("referrers")
+      .insert([
+        {
+          name: newReferrer.name,
+          phone: newReferrer.phone || null,
+          nationalId: newReferrer.nationalId || null,
+        },
+      ])
+      .select();
 
-    setNewReferrer({ name: "", phone: "", nationalId: "" });
-    setError("");
+    if (error) {
+      console.error("Error adding referrer:", error);
+      setError("خطا در افزودن معرف");
+    } else {
+      if (data) {
+        setReferrers([...referrers, ...data]);
+      }
+      setNewReferrer({ name: "", phone: "", nationalId: "" });
+      setError("");
+    }
   };
 
   return (
@@ -84,10 +114,10 @@ export default function ReferrersPage() {
                 />
                 <button
                   onClick={handleAddReferrer}
-                  disabled={!newReferrer.name}
+                  disabled={!newReferrer.name || loading}
                   className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                 >
-                  افزودن معرف
+                  {loading ? "در حال افزودن..." : "افزودن معرف"}
                 </button>
               </div>
             </div>
@@ -120,19 +150,27 @@ export default function ReferrersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {referrers.map((referrer) => (
-                    <tr key={referrer.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {referrer.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {referrer.phone || "-"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {referrer.nationalId || "-"}
+                  {loading ? (
+                    <tr>
+                      <td colSpan={3} className="text-center py-8">
+                        در حال بارگذاری...
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    referrers.map((referrer) => (
+                      <tr key={referrer.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {referrer.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {referrer.phone || "-"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {referrer.nationalId || "-"}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

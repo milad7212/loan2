@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import moment from "jalali-moment";
-import { useReferrers } from "./context/ReferrersContext";
+import { supabase } from "../../lib/supabaseClient";
 import {
   Tooltip,
   TooltipContent,
@@ -35,7 +35,7 @@ interface Buyer {
   name: string;
   phone: string;
   nationalId: string;
-  referrer?: string;
+  referrer_id?: string;
   requestedAmount: number;
   remainingAmount: number;
   status: "pending" | "partial" | "completed";
@@ -56,8 +56,8 @@ interface Seller {
 
 interface Transaction {
   id: string;
-  sellerId: string;
-  buyerIds: string[];
+  seller_id: string;
+  buyer_ids: string[];
   amount: number;
   status:
     | "pending_transfer"
@@ -98,11 +98,16 @@ interface PaymentGroup {
   }>;
 }
 
+interface Referrer {
+  id: string;
+  name: string;
+}
+
 // Constants
 const REFERRER_COMMISSION = 5000;
 
 export default function LoanCreditAdmin() {
-  const { referrers } = useReferrers();
+  const [referrers, setReferrers] = useState<Referrer[]>([]);
   const [creditPrice, setCreditPrice] = useState(135000);
   const [loading, setLoading] = useState(true);
   // State variables
@@ -111,71 +116,36 @@ export default function LoanCreditAdmin() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    // Simulate data fetching
-    setTimeout(() => {
-      setBuyers([
-        {
-          id: "1",
-          name: "احمد محمدی",
-          phone: "09123456789",
-          nationalId: "1234567890",
-          referrer: "حسن کریمی",
-          requestedAmount: 100,
-          remainingAmount: 100,
-          status: "pending",
-        },
-        {
-          id: "2",
-          name: "فاطمه احمدی",
-          phone: "09987654321",
-          nationalId: "0987654321",
-          requestedAmount: 50,
-          remainingAmount: 20,
-          status: "partial",
-        },
+    const fetchData = async () => {
+      setLoading(true);
+      const [
+        buyersRes,
+        sellersRes,
+        transactionsRes,
+        referrersRes,
+      ] = await Promise.all([
+        supabase.from("buyers").select("*"),
+        supabase.from("sellers").select("*"),
+        supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
+        supabase.from("referrers").select("id, name"),
       ]);
-      setSellers([
-        {
-          id: "1",
-          fullName: "حسن موسوی",
-          phone: "09777888999",
-          accountNumber: "1234567890",
-          cardNumber: "6037 9977 1234 5678",
-          creditAmount: 80,
-          remainingAmount: 80,
-          status: "active",
-        },
-      ]);
-      setTransactions([
-        {
-          id: "1",
-          sellerId: "1",
-          buyerIds: ["2"],
-          amount: 30,
-          status: "pending_payment",
-          date: "1403/10/15",
-          sellerName: "حسن موسوی",
-          buyerNames: ["فاطمه احمدی"],
-          sellerPhone: "09777888999",
-          sellerNationalId: "1234567890",
-          buyerPhones: ["09987654321"],
-          buyerNationalIds: ["0987654321"],
-          buyerReferrers: [undefined],
-          trackingCode: "40415001",
-          message:
-            "حسن موسوی عزیز، لطفاً تعداد 30 امتیاز وام را به نام فاطمه احمدی با کد ملی 0987654321 و شماره تماس 09987654321 منتقل نمایید.",
-          history: [
-            {
-              status: "در انتظار انتقال وام",
-              description: "معامله ایجاد شد",
-              date: "1403/10/15",
-              time: "14:30",
-            },
-          ],
-        },
-      ]);
+
+      if (buyersRes.error) console.error("Error fetching buyers:", buyersRes.error);
+      else setBuyers(buyersRes.data);
+
+      if (sellersRes.error) console.error("Error fetching sellers:", sellersRes.error);
+      else setSellers(sellersRes.data);
+
+      if (transactionsRes.error) console.error("Error fetching transactions:", transactionsRes.error);
+      else setTransactions(transactionsRes.data);
+
+      if (referrersRes.error) console.error("Error fetching referrers:", referrersRes.error);
+      else setReferrers(referrersRes.data);
+
       setLoading(false);
-    }, 1500);
+    };
+
+    fetchData();
   }, []);
 
   const [selectedSeller, setSelectedSeller] = useState<string>("");
@@ -271,17 +241,28 @@ export default function LoanCreditAdmin() {
    * Adds a new seller to the list of sellers.
    * @param sellerData The data of the new seller.
    */
-  const addSeller = (
+  const addSeller = async (
     sellerData: Omit<Seller, "id" | "remainingAmount" | "status">
   ) => {
-    const seller: Seller = {
-      id: Date.now().toString(),
-      ...sellerData,
-      remainingAmount: sellerData.creditAmount,
-      status: "active",
-    };
-    setSellers([...sellers, seller]);
-    setIsAddSellerModalOpen(false);
+    const { data, error } = await supabase
+      .from("sellers")
+      .insert([
+        {
+          ...sellerData,
+          remainingAmount: sellerData.creditAmount,
+          status: "active",
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Error adding seller:", error);
+    } else {
+      if (data) {
+        setSellers([...sellers, ...data]);
+      }
+      setIsAddSellerModalOpen(false);
+    }
   };
 
   const [buyerError, setBuyerError] = useState("");
@@ -289,7 +270,7 @@ export default function LoanCreditAdmin() {
   /**
    * Adds a new buyer to the list of buyers.
    */
-  const addBuyer = () => {
+  const addBuyer = async () => {
     if (!newBuyer.name) {
       setBuyerError("نام خریدار الزامی است.");
       return;
@@ -307,28 +288,40 @@ export default function LoanCreditAdmin() {
       return;
     }
 
-    const buyer: Buyer = {
-      id: Date.now().toString(),
-      name: newBuyer.name,
-      nationalId: newBuyer.nationalId,
-      phone: newBuyer.phone,
-      referrer: newBuyer.referrer || undefined,
-      requestedAmount: newBuyer.requestedAmount,
-      remainingAmount: newBuyer.requestedAmount,
-      status: "pending",
-      description: newBuyer.description,
-    };
-    setBuyers([...buyers, buyer]);
-    setNewBuyer({
-      name: "",
-      nationalId: "",
-      phone: "",
-      referrer: "",
-      requestedAmount: 0,
-      description: "",
-    });
-    setBuyerError("");
-    setIsAddBuyerModalOpen(false);
+    const { data, error } = await supabase
+      .from("buyers")
+      .insert([
+        {
+          name: newBuyer.name,
+          nationalId: newBuyer.nationalId,
+          phone: newBuyer.phone,
+          referrer_id: newBuyer.referrer || null,
+          requestedAmount: newBuyer.requestedAmount,
+          remainingAmount: newBuyer.requestedAmount,
+          status: "pending",
+          description: newBuyer.description,
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Error adding buyer:", error);
+      setBuyerError("خطا در افزودن خریدار");
+    } else {
+      if (data) {
+        setBuyers([...buyers, ...data]);
+      }
+      setNewBuyer({
+        name: "",
+        nationalId: "",
+        phone: "",
+        referrer: "",
+        requestedAmount: 0,
+        description: "",
+      });
+      setBuyerError("");
+      setIsAddBuyerModalOpen(false);
+    }
   };
 
   const [transactionError, setTransactionError] = useState("");
@@ -336,7 +329,7 @@ export default function LoanCreditAdmin() {
   /**
    * Creates a new transaction between a seller and one or more buyers.
    */
-  const createTransaction = () => {
+  const createTransaction = async () => {
     if (!selectedSeller) {
       setTransactionError("لطفا یک فروشنده انتخاب کنید.");
       return;
@@ -347,110 +340,41 @@ export default function LoanCreditAdmin() {
     }
 
     const seller = sellers.find((s) => s.id === selectedSeller);
-    const selectedBuyerObjects = buyers.filter((b) =>
-      selectedBuyers.includes(b.id)
-    );
-
     if (!seller) return;
 
-    let remainingSellerCredit = seller.remainingAmount;
-    const newTransactions: Transaction[] = [];
+    const amounts = selectedBuyers.map(
+      (buyerId) =>
+        buyers.find((b) => b.id === buyerId)?.remainingAmount || 0
+    );
 
-    selectedBuyerObjects.forEach((buyer, index) => {
-      if (remainingSellerCredit > 0) {
-        const transferAmount = Math.min(
-          buyer.remainingAmount,
-          remainingSellerCredit
-        );
-        const currentDate = moment().locale("fa").format("YYYY/MM/DD");
-        const trackingCode = generateTrackingCode(currentDate, [
-          ...transactions,
-          ...newTransactions.slice(0, index),
-        ]);
-
-        const message = generateMessage(seller, buyer, transferAmount, trackingCode);
-
-        const transaction: Transaction = {
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          sellerId: selectedSeller,
-          buyerIds: [buyer.id],
-          amount: transferAmount,
-          status: "pending_transfer",
-          date: currentDate,
-          sellerName: seller.fullName,
-          buyerNames: [buyer.name],
-          sellerPhone: seller.phone,
-          sellerNationalId: seller.accountNumber,
-          buyerPhones: [buyer.phone],
-          buyerNationalIds: [buyer.nationalId],
-          buyerReferrers: [buyer.referrer],
-          trackingCode: trackingCode,
-          message: message,
-          history: [
-            {
-              status: "در انتظار انتقال وام",
-              description: "معامله ایجاد شد",
-              date: new Date().toLocaleDateString("fa-IR"),
-              time: new Date().toLocaleTimeString("fa-IR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            },
-          ],
-        };
-
-        newTransactions.push(transaction);
-        remainingSellerCredit -= transferAmount;
-      }
+    const { data, error } = await supabase.rpc("create_transaction", {
+      seller_id_param: selectedSeller,
+      buyer_ids_param: selectedBuyers,
+      amounts_param: amounts,
     });
 
-    setTransactions([...transactions, ...newTransactions]);
+    if (error) {
+      console.error("Error creating transaction:", error);
+      setTransactionError("خطا در ایجاد معامله");
+    } else {
+      // Manually refetch data to update the UI.
+      // A better approach for production would be to have the RPC
+      // return all the updated rows and update state locally.
+      const [buyersRes, sellersRes, transactionsRes] = await Promise.all([
+        supabase.from("buyers").select("*"),
+        supabase.from("sellers").select("*"),
+        supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
+      ]);
 
-    const totalTransferred = newTransactions.reduce(
-      (sum, t) => sum + t.amount,
-      0
-    );
-    setSellers(
-      sellers.map((s) =>
-        s.id === selectedSeller
-          ? {
-              ...s,
-              remainingAmount: s.remainingAmount - totalTransferred,
-              status:
-                s.remainingAmount - totalTransferred === 0
-                  ? "completed"
-                  : "active",
-            }
-          : s
-      )
-    );
+      if (buyersRes.data) setBuyers(buyersRes.data);
+      if (sellersRes.data) setSellers(sellersRes.data);
+      if (transactionsRes.data) setTransactions(transactionsRes.data);
 
-    setBuyers(
-      buyers.map((buyer) => {
-        const buyerTransaction = newTransactions.find((t) =>
-          t.buyerIds.includes(buyer.id)
-        );
-        if (buyerTransaction) {
-          const newRemaining = buyer.remainingAmount - buyerTransaction.amount;
-          return {
-            ...buyer,
-            remainingAmount: newRemaining,
-            status:
-              newRemaining === 0
-                ? "completed"
-                : newRemaining < buyer.requestedAmount
-                ? "partial"
-                : "pending",
-          };
-        }
-        return buyer;
-      })
-    );
-
-    setSelectedSeller("");
-    setSelectedBuyers([]);
-    setTransactionError("");
-    alert("تراکنش با موفقیت ایجاد شد.");
+      setSelectedSeller("");
+      setSelectedBuyers([]);
+      setTransactionError("");
+      alert("تراکنش با موفقیت ایجاد شد.");
+    }
   };
 
   /**
@@ -520,36 +444,43 @@ export default function LoanCreditAdmin() {
    * Marks a payment group as complete.
    * @param group The payment group to mark as complete.
    */
-  const handlePaymentComplete = (group: PaymentGroup) => {
+  const handlePaymentComplete = async (group: PaymentGroup) => {
     const currentTime = new Date();
-    const updatedTransactions = transactions.map((t) => {
-      if (group.transactions.some((gt) => gt.id === t.id)) {
-        return {
-          ...t,
-          status: "completed" as const,
-          history: [
-            ...t.history,
-            {
-              status: "تسویه شده",
-              description: paymentDescription || "وجه به حساب فروشنده واریز شد",
-              date: currentTime.toLocaleDateString("fa-IR"),
-              time: currentTime.toLocaleTimeString("fa-IR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-              image: paymentImage || undefined,
-            },
-          ],
-        };
-      }
-      return t;
-    });
+    const transactionIds = group.transactions.map((t) => t.id);
 
-    setTransactions(updatedTransactions);
-    setIsPaymentModalOpen(false);
-    setSelectedPaymentGroup(null);
-    setPaymentDescription("");
-    setPaymentImage(null);
+    const newHistoryEntry = {
+      status: "completed",
+      description: paymentDescription || "وجه به حساب فروشنده واریز شد",
+      date: currentTime.toLocaleDateString("fa-IR"),
+      time: currentTime.toLocaleTimeString("fa-IR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      image: paymentImage || undefined,
+    };
+
+    const { error } = await supabase
+      .from("transactions")
+      .update({
+        status: "completed",
+        history: supabase.sql`history || ${JSON.stringify(newHistoryEntry)}::jsonb`,
+      })
+      .in("id", transactionIds);
+
+    if (error) {
+      console.error("Error updating transactions:", error);
+    } else {
+      const updatedTransactions = transactions.map((t) =>
+        transactionIds.includes(t.id)
+          ? { ...t, status: "completed", history: [...t.history, newHistoryEntry] }
+          : t
+      );
+      setTransactions(updatedTransactions);
+      setIsPaymentModalOpen(false);
+      setSelectedPaymentGroup(null);
+      setPaymentDescription("");
+      setPaymentImage(null);
+    }
   };
 
   const handlePriceSave = () => {
@@ -727,7 +658,6 @@ export default function LoanCreditAdmin() {
                 {sellers.length > 0 && (
                   <TransactionMatching
                     sellers={sellers}
-                    sellers={sellers}
                     buyers={buyers}
                     selectedSeller={selectedSeller}
                     setSelectedSeller={setSelectedSeller}
@@ -813,7 +743,7 @@ export default function LoanCreditAdmin() {
           >
             <option value="">انتخاب معرف (اختیاری)</option>
             {referrers.map((referrer) => (
-              <option key={referrer.id} value={referrer.name}>
+              <option key={referrer.id} value={referrer.id}>
                 {referrer.name}
               </option>
             ))}
@@ -1009,7 +939,7 @@ export default function LoanCreditAdmin() {
           </div>
           <div className="flex gap-2 justify-end mt-6">
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (
                   selectedStatusTransaction.status === "cancelled" &&
                   selectedStatusTransaction
@@ -1017,7 +947,7 @@ export default function LoanCreditAdmin() {
                   // Revert buyer's remaining amount
                   const updatedBuyers = buyers.map((buyer) => {
                     if (
-                      selectedStatusTransaction.buyerIds.includes(buyer.id)
+                      selectedStatusTransaction.buyer_ids.includes(buyer.id)
                     ) {
                       const newRemainingAmount =
                         buyer.remainingAmount +
@@ -1038,7 +968,7 @@ export default function LoanCreditAdmin() {
                   // Revert seller's remaining amount
                   const updatedSellers = sellers.map((seller) => {
                     if (
-                      seller.id === selectedStatusTransaction.sellerId
+                      seller.id === selectedStatusTransaction.seller_id
                     ) {
                       return {
                         ...seller,
@@ -1063,19 +993,35 @@ export default function LoanCreditAdmin() {
                   }),
                   image: uploadedImage || undefined,
                 };
-                const updatedTransactions = transactions.map((t) =>
-                  t.id === selectedStatusTransaction.id
-                    ? {
-                        ...t,
-                        status: selectedStatusTransaction.status,
-                        history: [...t.history, newHistoryEntry],
-                      }
-                    : t
-                );
-                setTransactions(updatedTransactions);
-                setIsStatusModalOpen(false);
-                setStatusDescription("");
-                setUploadedImage(null);
+
+                const { error } = await supabase
+                  .from("transactions")
+                  .update({
+                    status: selectedStatusTransaction.status,
+                    history: [
+                      ...(selectedStatusTransaction.history || []),
+                      newHistoryEntry,
+                    ],
+                  })
+                  .eq("id", selectedStatusTransaction.id);
+
+                if (error) {
+                  console.error("Error updating transaction status:", error);
+                } else {
+                  const updatedTransactions = transactions.map((t) =>
+                    t.id === selectedStatusTransaction.id
+                      ? {
+                          ...t,
+                          status: selectedStatusTransaction.status,
+                          history: [...t.history, newHistoryEntry],
+                        }
+                      : t
+                  );
+                  setTransactions(updatedTransactions);
+                  setIsStatusModalOpen(false);
+                  setStatusDescription("");
+                  setUploadedImage(null);
+                }
               }}
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
             >
