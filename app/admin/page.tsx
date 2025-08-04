@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import moment from "jalali-moment";
 import { supabase } from "../../lib/supabaseClient";
+import { useUser } from "../context/UserProvider";
+import { useRouter } from "next/navigation";
 import {
   Tooltip,
   TooltipContent,
@@ -107,6 +109,8 @@ interface Referrer {
 const REFERRER_COMMISSION = 5000;
 
 export default function LoanCreditAdmin() {
+  const { user, loading: userLoading } = useUser();
+  const router = useRouter();
   const [referrers, setReferrers] = useState<Referrer[]>([]);
   const [creditPrice, setCreditPrice] = useState(135000);
   const [loading, setLoading] = useState(true);
@@ -116,37 +120,45 @@ export default function LoanCreditAdmin() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const [
-        buyersRes,
-        sellersRes,
-        transactionsRes,
-        referrersRes,
-      ] = await Promise.all([
-        supabase.from("buyers").select("*"),
-        supabase.from("sellers").select("*"),
-        supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
-        supabase.from("referrers").select("id, name"),
-      ]);
+    if (!userLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, userLoading, router]);
 
-      if (buyersRes.error) console.error("Error fetching buyers:", buyersRes.error);
-      else setBuyers(buyersRes.data);
+  useEffect(() => {
+    if (user) {
+      const fetchData = async () => {
+        setLoading(true);
+        const [
+          buyersRes,
+          sellersRes,
+          transactionsRes,
+          referrersRes,
+        ] = await Promise.all([
+          supabase.from("buyers").select("*"),
+          supabase.from("sellers").select("*"),
+          supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
+          supabase.from("referrers").select("id, name"),
+        ]);
 
-      if (sellersRes.error) console.error("Error fetching sellers:", sellersRes.error);
-      else setSellers(sellersRes.data);
+        if (buyersRes.error) console.error("Error fetching buyers:", buyersRes.error);
+        else setBuyers(buyersRes.data);
 
-      if (transactionsRes.error) console.error("Error fetching transactions:", transactionsRes.error);
-      else setTransactions(transactionsRes.data);
+        if (sellersRes.error) console.error("Error fetching sellers:", sellersRes.error);
+        else setSellers(sellersRes.data);
 
-      if (referrersRes.error) console.error("Error fetching referrers:", referrersRes.error);
-      else setReferrers(referrersRes.data);
+        if (transactionsRes.error) console.error("Error fetching transactions:", transactionsRes.error);
+        else setTransactions(transactionsRes.data);
 
-      setLoading(false);
-    };
+        if (referrersRes.error) console.error("Error fetching referrers:", referrersRes.error);
+        else setReferrers(referrersRes.data);
 
-    fetchData();
-  }, []);
+        setLoading(false);
+      };
+
+      fetchData();
+    }
+  }, [user]);
 
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [selectedBuyers, setSelectedBuyers] = useState<string[]>([]);
@@ -526,6 +538,14 @@ export default function LoanCreditAdmin() {
       }, 250);
     }
   };
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p>در حال بارگذاری...</p>
+      </div>
+    );
+  }
 
   const totalBuyers = buyers.length;
   const totalDemand = buyers.reduce(
@@ -998,10 +1018,7 @@ export default function LoanCreditAdmin() {
                   .from("transactions")
                   .update({
                     status: selectedStatusTransaction.status,
-                    history: [
-                      ...(selectedStatusTransaction.history || []),
-                      newHistoryEntry,
-                    ],
+                    history: supabase.sql`history || ${JSON.stringify(newHistoryEntry)}::jsonb`,
                   })
                   .eq("id", selectedStatusTransaction.id);
 
