@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import moment from "jalali-moment";
 import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../context/UserProvider";
-import { useRouter } from "next/navigation";
 import {
   Tooltip,
   TooltipContent,
@@ -109,8 +107,6 @@ interface Referrer {
 const REFERRER_COMMISSION = 5000;
 
 export default function LoanCreditAdmin() {
-  const { user, loading: userLoading } = useUser();
-  const router = useRouter();
   const [referrers, setReferrers] = useState<Referrer[]>([]);
   const [creditPrice, setCreditPrice] = useState(135000);
   const [loading, setLoading] = useState(true);
@@ -120,45 +116,37 @@ export default function LoanCreditAdmin() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    if (!userLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, userLoading, router]);
+    const fetchData = async () => {
+      setLoading(true);
+      const [
+        buyersRes,
+        sellersRes,
+        transactionsRes,
+        referrersRes,
+      ] = await Promise.all([
+        supabase.from("buyers").select("*"),
+        supabase.from("sellers").select("*"),
+        supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
+        supabase.from("referrers").select("id, name"),
+      ]);
 
-  useEffect(() => {
-    if (user) {
-      const fetchData = async () => {
-        setLoading(true);
-        const [
-          buyersRes,
-          sellersRes,
-          transactionsRes,
-          referrersRes,
-        ] = await Promise.all([
-          supabase.from("buyers").select("*"),
-          supabase.from("sellers").select("*"),
-          supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
-          supabase.from("referrers").select("id, name"),
-        ]);
+      if (buyersRes.error) console.error("Error fetching buyers:", buyersRes.error);
+      else setBuyers(buyersRes.data);
 
-        if (buyersRes.error) console.error("Error fetching buyers:", buyersRes.error);
-        else setBuyers(buyersRes.data);
+      if (sellersRes.error) console.error("Error fetching sellers:", sellersRes.error);
+      else setSellers(sellersRes.data);
 
-        if (sellersRes.error) console.error("Error fetching sellers:", sellersRes.error);
-        else setSellers(sellersRes.data);
+      if (transactionsRes.error) console.error("Error fetching transactions:", transactionsRes.error);
+      else setTransactions(transactionsRes.data);
 
-        if (transactionsRes.error) console.error("Error fetching transactions:", transactionsRes.error);
-        else setTransactions(transactionsRes.data);
+      if (referrersRes.error) console.error("Error fetching referrers:", referrersRes.error);
+      else setReferrers(referrersRes.data);
 
-        if (referrersRes.error) console.error("Error fetching referrers:", referrersRes.error);
-        else setReferrers(referrersRes.data);
+      setLoading(false);
+    };
 
-        setLoading(false);
-      };
-
-      fetchData();
-    }
-  }, [user]);
+    fetchData();
+  }, []);
 
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [selectedBuyers, setSelectedBuyers] = useState<string[]>([]);
@@ -354,15 +342,26 @@ export default function LoanCreditAdmin() {
     const seller = sellers.find((s) => s.id === selectedSeller);
     if (!seller) return;
 
-    const amounts = selectedBuyers.map(
-      (buyerId) =>
-        buyers.find((b) => b.id === buyerId)?.remainingAmount || 0
+    const selectedBuyerObjects = buyers.filter((b) =>
+      selectedBuyers.includes(b.id)
+    );
+
+    const amounts = selectedBuyerObjects.map((b) => b.remainingAmount);
+    const currentDate = moment().locale("fa").format("YYYY/MM/DD");
+    const trackingCode = generateTrackingCode(currentDate, transactions);
+    const message = generateMessage(
+      seller,
+      selectedBuyerObjects[0],
+      amounts[0],
+      trackingCode
     );
 
     const { data, error } = await supabase.rpc("create_transaction", {
-      seller_id_param: selectedSeller,
-      buyer_ids_param: selectedBuyers,
-      amounts_param: amounts,
+      p_seller_id: selectedSeller,
+      p_buyer_ids: selectedBuyers,
+      p_amounts: amounts,
+      p_tracking_code: trackingCode,
+      p_message: message,
     });
 
     if (error) {
@@ -370,8 +369,6 @@ export default function LoanCreditAdmin() {
       setTransactionError("خطا در ایجاد معامله");
     } else {
       // Manually refetch data to update the UI.
-      // A better approach for production would be to have the RPC
-      // return all the updated rows and update state locally.
       const [buyersRes, sellersRes, transactionsRes] = await Promise.all([
         supabase.from("buyers").select("*"),
         supabase.from("sellers").select("*"),
