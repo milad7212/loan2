@@ -106,7 +106,12 @@ interface Referrer {
 // Constants
 const REFERRER_COMMISSION = 5000;
 
+import { useUser } from "../context/UserProvider";
+import { useRouter } from "next/navigation";
+
 export default function LoanCreditAdmin() {
+  const { user, loading: userLoading } = useUser();
+  const router = useRouter();
   const [referrers, setReferrers] = useState<Referrer[]>([]);
   const [creditPrice, setCreditPrice] = useState(135000);
   const [loading, setLoading] = useState(true);
@@ -116,8 +121,15 @@ export default function LoanCreditAdmin() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    if (!userLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, userLoading, router]);
+
+  useEffect(() => {
+    if (user) {
+      const fetchData = async () => {
+        setLoading(true);
       const [
         buyersRes,
         sellersRes,
@@ -264,6 +276,14 @@ export default function LoanCreditAdmin() {
       setIsAddSellerModalOpen(false);
     }
   };
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p>در حال بارگذاری...</p>
+      </div>
+    );
+  }
 
   const [buyerError, setBuyerError] = useState("");
 
