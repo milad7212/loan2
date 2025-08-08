@@ -109,9 +109,9 @@ BEGIN
         --   buyer_id uuid REFERENCES buyers(id),
         --   amount int
         -- );
-        --
-        -- INSERT INTO transaction_buyers (transaction_id, buyer_id, amount)
-        -- VALUES (new_transaction_id, buyer_id, amount_to_transfer);
+
+        INSERT INTO transaction_buyers (transaction_id, buyer_id, amount)
+        VALUES (new_transaction_id, buyer_id, amount_to_transfer);
 
     END LOOP;
 
