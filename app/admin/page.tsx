@@ -127,34 +127,41 @@ export default function LoanCreditAdmin() {
   }, [user, userLoading, router]);
 
   useEffect(() => {
-    if (user) {
-      const fetchData = async () => {
-        setLoading(true);
-      const [
-        buyersRes,
-        sellersRes,
-        transactionsRes,
-        referrersRes,
-      ] = await Promise.all([
-        supabase.from("buyers").select("*"),
-        supabase.from("sellers").select("*"),
-        supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
-        supabase.from("referrers").select("id, name"),
-      ]);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [buyersRes, sellersRes, transactionsRes, referrersRes] =
+          await Promise.all([
+            supabase.from("buyers").select("*"),
+            supabase.from("sellers").select("*"),
+            supabase
+              .from("transactions")
+              .select(
+                "*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"
+              ),
+            supabase.from("referrers").select("id, name"),
+          ]);
 
-      if (buyersRes.error) console.error("Error fetching buyers:", buyersRes.error);
-      else setBuyers(buyersRes.data);
+        if (buyersRes.error)
+          console.error("Error fetching buyers:", buyersRes.error);
+        else setBuyers(buyersRes.data);
 
-      if (sellersRes.error) console.error("Error fetching sellers:", sellersRes.error);
-      else setSellers(sellersRes.data);
+        if (sellersRes.error)
+          console.error("Error fetching sellers:", sellersRes.error);
+        else setSellers(sellersRes.data);
 
-      if (transactionsRes.error) console.error("Error fetching transactions:", transactionsRes.error);
-      else setTransactions(transactionsRes.data);
+        if (transactionsRes.error)
+          console.error("Error fetching transactions:", transactionsRes.error);
+        else setTransactions(transactionsRes.data);
 
-      if (referrersRes.error) console.error("Error fetching referrers:", referrersRes.error);
-      else setReferrers(referrersRes.data);
-
-      setLoading(false);
+        if (referrersRes.error)
+          console.error("Error fetching referrers:", referrersRes.error);
+        else setReferrers(referrersRes.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
@@ -219,7 +226,9 @@ export default function LoanCreditAdmin() {
     const sameDayTransactions = transactions.filter(
       (t) => t.date === jalaliDate
     ).length;
-    const sequenceNumber = (sameDayTransactions + 1).toString().padStart(3, "0");
+    const sequenceNumber = (sameDayTransactions + 1)
+      .toString()
+      .padStart(3, "0");
 
     return `${datePrefix}${sequenceNumber}`;
   };
@@ -232,9 +241,9 @@ export default function LoanCreditAdmin() {
   ) => {
     return `${seller.fullName} عزیز،
 
-لطفاً تعداد ${transferAmount} امتیاز وام را به نام ${
-      buyer.name
-    } با کد ملی ${buyer.nationalId} و شماره تماس ${buyer.phone} منتقل نمایید.
+لطفاً تعداد ${transferAmount} امتیاز وام را به نام ${buyer.name} با کد ملی ${
+      buyer.nationalId
+    } و شماره تماس ${buyer.phone} منتقل نمایید.
 
 مبلغ ${(transferAmount * creditPrice).toLocaleString(
       "fa-IR"
@@ -392,7 +401,11 @@ export default function LoanCreditAdmin() {
       const [buyersRes, sellersRes, transactionsRes] = await Promise.all([
         supabase.from("buyers").select("*"),
         supabase.from("sellers").select("*"),
-        supabase.from("transactions").select("*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"),
+        supabase
+          .from("transactions")
+          .select(
+            "*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"
+          ),
       ]);
 
       if (buyersRes.data) setBuyers(buyersRes.data);
@@ -492,7 +505,9 @@ export default function LoanCreditAdmin() {
       .from("transactions")
       .update({
         status: "completed",
-        history: supabase.sql`history || ${JSON.stringify(newHistoryEntry)}::jsonb`,
+        history: supabase.sql`history || ${JSON.stringify(
+          newHistoryEntry
+        )}::jsonb`,
       })
       .in("id", transactionIds);
 
@@ -501,7 +516,11 @@ export default function LoanCreditAdmin() {
     } else {
       const updatedTransactions = transactions.map((t) =>
         transactionIds.includes(t.id)
-          ? { ...t, status: "completed", history: [...t.history, newHistoryEntry] }
+          ? {
+              ...t,
+              status: "completed",
+              history: [...t.history, newHistoryEntry],
+            }
           : t
       );
       setTransactions(updatedTransactions);
@@ -1004,9 +1023,7 @@ export default function LoanCreditAdmin() {
 
                   // Revert seller's remaining amount
                   const updatedSellers = sellers.map((seller) => {
-                    if (
-                      seller.id === selectedStatusTransaction.seller_id
-                    ) {
+                    if (seller.id === selectedStatusTransaction.seller_id) {
                       return {
                         ...seller,
                         remainingAmount:
@@ -1035,7 +1052,9 @@ export default function LoanCreditAdmin() {
                   .from("transactions")
                   .update({
                     status: selectedStatusTransaction.status,
-                    history: supabase.sql`history || ${JSON.stringify(newHistoryEntry)}::jsonb`,
+                    history: supabase.sql`history || ${JSON.stringify(
+                      newHistoryEntry
+                    )}::jsonb`,
                   })
                   .eq("id", selectedStatusTransaction.id);
 
