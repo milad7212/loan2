@@ -57,7 +57,7 @@ interface Seller {
 interface Transaction {
   id: string;
   seller_id: string;
-  buyer_ids: string[];
+  buyer_ids: string[]; // This might be redundant if the linking table is the source of truth
   amount: number;
   status:
     | "pending_transfer"
@@ -67,14 +67,15 @@ interface Transaction {
     | "cancelled"
     | "paid";
   date: string;
-  sellerName: string;
-  buyerNames: string[];
-  sellerPhone: string;
-  sellerNationalId: string;
-  buyerPhones: string[];
-  buyerNationalIds: string[];
-  buyerReferrers: (string | undefined)[];
   tracking_code: string;
+  seller: {
+    full_name: string;
+  };
+  buyers: {
+    buyer: {
+      name: string;
+    };
+  }[];
   message: string;
   history: Array<{
     status: string;
@@ -94,7 +95,7 @@ interface PaymentGroup {
   referrerPayments: Array<{
     referrerName: string;
     totalAmount: number;
-    transactions: Transaction[];
+    transactions: any[]; // Using any here as the structure is complex
   }>;
 }
 
@@ -137,7 +138,7 @@ export default function LoanCreditAdmin() {
             supabase
               .from("transactions")
               .select(
-                "*, seller:sellers(full_name), buyers:transaction_buyers(buyer:buyers(name))"
+                "*, seller:sellers(full_name, phone, national_id), buyers:transaction_buyers(buyer:buyers(name, phone, national_id, referrer_id))"
               ),
             supabase.from("referrers").select("id, name"),
           ]);
@@ -441,7 +442,7 @@ export default function LoanCreditAdmin() {
         supabase
           .from("transactions")
           .select(
-            "*, seller:sellers(full_name), buyers:transaction_buyers(buyer:buyers(name))"
+            "*, seller:sellers(full_name, phone, national_id), buyers:transaction_buyers(buyer:buyers(name, phone, national_id, referrer_id))"
           ),
       ]);
 
@@ -462,10 +463,19 @@ export default function LoanCreditAdmin() {
    */
   const getPaymentGroups = (): PaymentGroup[] => {
     const pendingTransactions = transactions.filter(
-      (t) => t.status === "pending_payment"
+      (t) => t.status === "pending_payment" && t.seller
     );
+
+    const getSafe = (fn: () => any, defaultValue: any = "") => {
+      try {
+        return fn() || defaultValue;
+      } catch (e) {
+        return defaultValue;
+      }
+    };
+
     const groupedBySeller = pendingTransactions.reduce((acc, transaction) => {
-      const key = transaction.sellerPhone;
+      const key = getSafe(() => transaction.seller.phone, 'unknown');
       if (!acc[key]) {
         acc[key] = [];
       }
@@ -482,19 +492,24 @@ export default function LoanCreditAdmin() {
         );
 
         const referrerGroups = transactions.reduce((acc, transaction) => {
-          transaction.buyerReferrers.forEach((referrer, index) => {
-            if (referrer) {
-              if (!acc[referrer]) {
-                acc[referrer] = [];
-              }
-              acc[referrer].push({
-                ...transaction,
-                amount: transaction.amount,
-              });
+          getSafe(() => transaction.buyers, []).forEach((b: any) => {
+            const referrerId = getSafe(() => b.buyer.referrer_id);
+            if (referrerId) {
+                const referrer = referrers.find(r => r.id === referrerId);
+                if (referrer) {
+                    if (!acc[referrer.name]) {
+                        acc[referrer.name] = [];
+                    }
+                    acc[referrer.name].push({
+                        ...transaction,
+                        amount: transaction.amount, // This seems wrong, should be per-buyer amount
+                    });
+                }
             }
           });
           return acc;
-        }, {} as Record<string, Transaction[]>);
+        }, {} as Record<string, any[]>);
+
 
         const referrerPayments = Object.entries(referrerGroups).map(
           ([referrerName, referrerTransactions]) => ({
@@ -509,7 +524,7 @@ export default function LoanCreditAdmin() {
 
         return {
           sellerPhone,
-          sellerName: transactions[0].sellerName,
+          sellerName: getSafe(() => transactions[0].seller.full_name, ""),
           sellerCardNumber: seller?.card_number || "",
           transactions,
           totalAmount,

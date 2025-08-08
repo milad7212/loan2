@@ -2,15 +2,20 @@ import React from "react";
 
 interface Transaction {
   id: string;
-  sellerName: string;
-  sellerNationalId: string;
-  sellerPhone: string;
-  buyerNames: string[];
-  buyerNationalIds: string[];
-  buyerPhones:string[];
   amount: number;
   date: string;
   tracking_code: string;
+  seller: {
+    full_name: string;
+    phone: string;
+    national_id: string;
+  };
+  buyers: {
+    buyer: {
+      name: string;
+      national_id: string;
+    };
+  }[];
 }
 
 interface PrintableDocumentProps {
@@ -22,6 +27,9 @@ const PrintableDocument: React.FC<PrintableDocumentProps> = ({
   transaction,
   copyType,
 }) => {
+  const buyerNames = transaction.buyers.map(b => b.buyer.name).join(", ");
+  const buyerNationalIds = transaction.buyers.map(b => b.buyer.national_id).join(", ");
+
   return (
     <div className="a5-page">
       <div className="header">
@@ -38,12 +46,12 @@ const PrintableDocument: React.FC<PrintableDocumentProps> = ({
       </div>
       <div className="content">
         <p>
-          اینجانب، <strong>{transaction.sellerName}</strong> به کد ملی{" "}
-          <strong>{transaction.sellerNationalId}</strong> و شماره تماس{" "}
-          <strong>{transaction.sellerPhone}</strong>، اقرار می‌نمایم که تعداد{" "}
+          اینجانب، <strong>{transaction.seller.full_name}</strong> به کد ملی{" "}
+          <strong>{transaction.seller.national_id}</strong> و شماره تماس{" "}
+          <strong>{transaction.seller.phone}</strong>، اقرار می‌نمایم که تعداد{" "}
           <strong>{transaction.amount}</strong> امتیاز وام رسالت را به نام آقا/خانم{" "}
-          <strong>{transaction.buyerNames.join(", ")}</strong> به کد ملی{" "}
-          <strong>{transaction.buyerNationalIds.join(", ")}</strong> منتقل کرده‌ام.
+          <strong>{buyerNames}</strong> به کد ملی{" "}
+          <strong>{buyerNationalIds}</strong> منتقل کرده‌ام.
         </p>
         <p>
           مبلغ کل این معامله با مجموعه رسانت تسویه شده است و اینجانب هیچ‌گونه

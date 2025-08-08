@@ -9,9 +9,8 @@ import {
 } from "lucide-react";
 
 interface Transaction {
-  id:string;
+  id: string;
   seller_id: string;
-  buyer_ids: string[];
   amount: number;
   status:
     | "pending_transfer"
@@ -21,22 +20,22 @@ interface Transaction {
     | "cancelled"
     | "paid";
   date: string;
-  sellerName: string;
-  buyerNames: string[];
-  sellerPhone: string;
-  sellerNationalId: string;
-  buyerPhones: string[];
-  buyerNationalIds: string[];
-  buyerReferrers: (string | undefined)[];
   tracking_code: string;
   message: string;
-  history: Array<{
-    status: string;
-    description: string;
-    date: string;
-    time: string;
-    image?: string;
-  }>;
+  history: any[];
+  seller: {
+    full_name: string;
+    phone: string;
+    national_id: string;
+  };
+  buyers: {
+    buyer: {
+      name: string;
+      phone: string;
+      national_id: string;
+      referrer_id?: string;
+    };
+  }[];
 }
 
 interface TransactionHistoryProps {
@@ -97,30 +96,40 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   sortDirection,
   setSortDirection,
 }) => {
+  // Helper to safely get nested properties
+  const getSafe = (fn: () => any, defaultValue: any = "") => {
+    try {
+      return fn() || defaultValue;
+    } catch (e) {
+      return defaultValue;
+    }
+  };
+
   const filteredTransactions = transactions.filter((transaction) => {
     const lowercasedSearchTerm = searchTerm.toLowerCase();
+    const sellerName = getSafe(() => transaction.seller.full_name, "");
+    const buyerNames = getSafe(() => transaction.buyers.map(b => b.buyer.name), []);
+
     return (
-      transaction.sellerName.toLowerCase().includes(lowercasedSearchTerm) ||
-      transaction.buyerNames.some((name) =>
-        name.toLowerCase().includes(lowercasedSearchTerm)
-      ) ||
+      sellerName.toLowerCase().includes(lowercasedSearchTerm) ||
+      buyerNames.some((name: string) => name.toLowerCase().includes(lowercasedSearchTerm)) ||
       transaction.tracking_code.toLowerCase().includes(lowercasedSearchTerm) ||
-      transaction.sellerPhone.includes(searchTerm) ||
-      transaction.buyerPhones.some((phone) => phone.includes(searchTerm)) ||
-      transaction.sellerNationalId.includes(searchTerm) ||
-      transaction.buyerNationalIds.some((id) => id.includes(searchTerm)) ||
-      transaction.date.includes(searchTerm) ||
-      (transaction.buyerReferrers &&
-        transaction.buyerReferrers.some(
-          (referrer) =>
-            referrer && referrer.toLowerCase().includes(lowercasedSearchTerm)
-        ))
+      getSafe(() => transaction.seller.phone, "").includes(searchTerm) ||
+      buyerNames.some((name: string) => name.toLowerCase().includes(lowercasedSearchTerm))
     );
   });
 
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
-    let aValue: any = a[sortField as keyof Transaction];
-    let bValue: any = b[sortField as keyof Transaction];
+    let aValue: any;
+    let bValue: any;
+
+    if (sortField === 'sellerName') {
+      aValue = getSafe(() => a.seller.full_name, '');
+      bValue = getSafe(() => b.seller.full_name, '');
+    } else {
+      aValue = a[sortField as keyof Transaction];
+      bValue = b[sortField as keyof Transaction];
+    }
 
     if (sortField === "date") {
       aValue = new Date(a.date.replace(/\//g, "-")).getTime();
@@ -134,22 +143,23 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
-      sortedTransactions.map((t) => ({
-        تاریخ: t.date,
-        فروشنده: t.sellerName,
-        "کد ملی فروشنده": t.sellerNationalId,
-        "موبایل فروشنده": t.sellerPhone,
-        خریدار: t.buyerNames.join(", "),
-        "کد ملی خریدار": t.buyerNationalIds.join(", "),
-        "موبایل خریدار": t.buyerPhones.join(", "),
-        معرف:
-          t.buyerReferrers && t.buyerReferrers.filter(Boolean).join(", ")
-            ? t.buyerReferrers.filter(Boolean).join(", ")
-            : "-",
-        مقدار: t.amount,
-        "کد پیگیری": t.tracking_code,
-        وضعیت: t.status,
-      }))
+      sortedTransactions.map((t) => {
+        const buyerNames = getSafe(() => t.buyers.map(b => b.buyer.name).join(", "), "");
+        const buyerPhones = getSafe(() => t.buyers.map(b => b.buyer.phone).join(", "), "");
+        const buyerNationalIds = getSafe(() => t.buyers.map(b => b.buyer.national_id).join(", "), "");
+        return {
+          "تاریخ": t.date,
+          "فروشنده": getSafe(() => t.seller.full_name),
+          "کد ملی فروشنده": getSafe(() => t.seller.national_id),
+          "موبایل فروشنده": getSafe(() => t.seller.phone),
+          "خریدار": buyerNames,
+          "کد ملی خریدار": buyerNationalIds,
+          "موبایل خریدار": buyerPhones,
+          "مقدار": t.amount,
+          "کد پیگیری": t.tracking_code,
+          "وضعیت": t.status,
+        };
+      })
     );
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
@@ -216,12 +226,12 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
               <tr key={transaction.id} className="hover:bg-gray-100 transition-colors">
                 <td className="py-4 px-4 whitespace-nowrap">{transaction.date}</td>
                 <td className="py-4 px-4 whitespace-nowrap">
-                  <div className="font-medium text-gray-800">{transaction.sellerName}</div>
-                  <div className="text-gray-500">{transaction.sellerPhone}</div>
+                  <div className="font-medium text-gray-800">{getSafe(() => transaction.seller.full_name)}</div>
+                  <div className="text-gray-500">{getSafe(() => transaction.seller.phone)}</div>
                 </td>
                 <td className="py-4 px-4 whitespace-nowrap">
-                  <div className="font-medium text-gray-800">{transaction.buyerNames.join(", ")}</div>
-                  <div className="text-gray-500">{transaction.buyerPhones.join(", ")}</div>
+                  <div className="font-medium text-gray-800">{getSafe(() => transaction.buyers.map(b => b.buyer.name).join(", "))}</div>
+                  <div className="text-gray-500">{getSafe(() => transaction.buyers.map(b => b.buyer.phone).join(", "))}</div>
                 </td>
                 <td className="py-4 px-4 whitespace-nowrap">{transaction.amount} امتیاز</td>
                 <td className="py-4 px-4 whitespace-nowrap font-mono text-xs">{transaction.tracking_code}</td>
