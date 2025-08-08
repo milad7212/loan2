@@ -34,22 +34,22 @@ interface Buyer {
   id: string;
   name: string;
   phone: string;
-  nationalId: string;
+  national_id: string;
   referrer_id?: string;
-  requestedAmount: number;
-  remainingAmount: number;
+  requested_amount: number;
+  remaining_amount: number;
   status: "pending" | "partial" | "completed";
   description?: string;
 }
 
 interface Seller {
   id: string;
-  fullName: string;
+  full_name: string;
   phone: string;
-  accountNumber: string;
-  cardNumber: string;
-  creditAmount: number;
-  remainingAmount: number;
+  account_number: string;
+  card_number: string;
+  credit_amount: number;
+  remaining_amount: number;
   status: "active" | "completed";
   description?: string;
 }
@@ -74,7 +74,7 @@ interface Transaction {
   buyerPhones: string[];
   buyerNationalIds: string[];
   buyerReferrers: (string | undefined)[];
-  trackingCode: string;
+  tracking_code: string;
   message: string;
   history: Array<{
     status: string;
@@ -195,10 +195,10 @@ export default function LoanCreditAdmin() {
   const [newPrice, setNewPrice] = useState(creditPrice);
   const [newBuyer, setNewBuyer] = useState({
     name: "",
-    nationalId: "",
+    national_id: "",
     phone: "",
     referrer: "",
-    requestedAmount: 0,
+    requested_amount: 0,
     description: "",
   });
   const [buyerError, setBuyerError] = useState("");
@@ -241,10 +241,10 @@ export default function LoanCreditAdmin() {
     transferAmount: number,
     trackingCode: string
   ) => {
-    return `${seller.fullName} عزیز،
+    return `${seller.full_name} عزیز،
 
 لطفاً تعداد ${transferAmount} امتیاز وام را به نام ${buyer.name} با کد ملی ${
-      buyer.nationalId
+      buyer.national_id
     } و شماره تماس ${buyer.phone} منتقل نمایید.
 
 مبلغ ${(transferAmount * creditPrice).toLocaleString(
@@ -312,7 +312,7 @@ export default function LoanCreditAdmin() {
       setBuyerError("شماره تماس خریدار الزامی است.");
       return;
     }
-    if (newBuyer.requestedAmount <= 0) {
+    if (newBuyer.requested_amount <= 0) {
       setBuyerError("مقدار امتیاز درخواستی باید بیشتر از صفر باشد.");
       return;
     }
@@ -322,11 +322,11 @@ export default function LoanCreditAdmin() {
       .insert([
         {
           name: newBuyer.name,
-          nationalId: newBuyer.nationalId,
+          national_id: newBuyer.national_id,
           phone: newBuyer.phone,
           referrer_id: newBuyer.referrer || null,
-          requestedAmount: newBuyer.requestedAmount,
-          remainingAmount: newBuyer.requestedAmount,
+          requested_amount: newBuyer.requested_amount,
+          remaining_amount: newBuyer.requested_amount,
           status: "pending",
           description: newBuyer.description,
         },
@@ -335,7 +335,12 @@ export default function LoanCreditAdmin() {
 
     if (error) {
       console.error("Error adding buyer:", error);
-      setBuyerError("خطا در افزودن خریدار");
+      const errorMessage =
+        error.message.includes("violates unique constraint") &&
+        error.message.includes("national_id")
+          ? "این کد ملی قبلا ثبت شده است."
+          : "خطا در افزودن خریدار. لطفاً ورودی‌های خود را بررسی کنید.";
+      setBuyerError(errorMessage);
     } else {
       if (data) {
         setBuyers([...buyers, ...data]);
@@ -570,7 +575,7 @@ export default function LoanCreditAdmin() {
       printWindow.document.write(`
         <html>
           <head>
-            <title>سند تحویل - ${selectedPrintTransaction.trackingCode}</title>
+            <title>سند تحویل - ${selectedPrintTransaction.tracking_code}</title>
             <style>${styles}</style>
           </head>
           <body dir="rtl">${content}</body>
@@ -595,7 +600,7 @@ export default function LoanCreditAdmin() {
 
   const totalBuyers = buyers.length;
   const totalDemand = buyers.reduce(
-    (sum, buyer) => sum + buyer.remainingAmount,
+    (sum, buyer) => sum + buyer.remaining_amount,
     0
   );
   const completedTransactions = transactions.length;
@@ -787,7 +792,7 @@ export default function LoanCreditAdmin() {
             placeholder="کد ملی"
             value={newBuyer.nationalId}
             onChange={(e) =>
-              setNewBuyer({ ...newBuyer, nationalId: e.target.value })
+              setNewBuyer({ ...newBuyer, national_id: e.target.value })
             }
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -821,7 +826,7 @@ export default function LoanCreditAdmin() {
             onChange={(e) =>
               setNewBuyer({
                 ...newBuyer,
-                requestedAmount: Number.parseInt(e.target.value) || 0,
+                requested_amount: Number.parseInt(e.target.value) || 0,
               })
             }
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1020,9 +1025,9 @@ export default function LoanCreditAdmin() {
                         selectedStatusTransaction.amount;
                       return {
                         ...buyer,
-                        remainingAmount: newRemainingAmount,
+                        remaining_amount: newRemainingAmount,
                         status:
-                          newRemainingAmount >= buyer.requestedAmount
+                          newRemainingAmount >= buyer.requested_amount
                             ? ("pending" as const)
                             : ("partial" as const),
                       };
@@ -1036,8 +1041,8 @@ export default function LoanCreditAdmin() {
                     if (seller.id === selectedStatusTransaction.seller_id) {
                       return {
                         ...seller,
-                        remainingAmount:
-                          seller.remainingAmount +
+                        remaining_amount:
+                          seller.remaining_amount +
                           selectedStatusTransaction.amount,
                         status: "active" as const,
                       };

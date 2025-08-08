@@ -10,18 +10,18 @@ const formatCardNumber = (value: string) => {
 
 interface Seller {
   id: string
-  fullName: string
+  full_name: string
   phone: string
-  accountNumber: string
-  cardNumber: string
-  creditAmount: number
-  remainingAmount: number
+  account_number: string
+  card_number: string
+  credit_amount: number
+  remaining_amount: number
   status: "active" | "completed"
   description?: string
 }
 
 interface SellerFormProps {
-  addSeller: (seller: Omit<Seller, "id" | "remainingAmount" | "status">) => void
+  addSeller: (seller: Omit<Seller, "id" | "remaining_amount" | "status">) => void
   creditPrice: number
 }
 
@@ -30,28 +30,28 @@ interface SellerFormProps {
  */
 const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
   const [newSeller, setNewSeller] = useState({
-    fullName: "",
+    full_name: "",
     phone: "",
-    accountNumber: "",
-    cardNumber: "",
-    creditAmount: 0,
+    account_number: "",
+    card_number: "",
+    credit_amount: 0,
     description: "",
   })
 
   const [error, setError] = useState("")
 
   const handleAddSeller = () => {
-    if (!newSeller.fullName || !newSeller.phone || newSeller.creditAmount <= 0) {
+    if (!newSeller.full_name || !newSeller.phone || newSeller.credit_amount <= 0) {
       setError("Please fill all required fields.")
       return
     }
     addSeller(newSeller)
     setNewSeller({
-      fullName: "",
+      full_name: "",
       phone: "",
-      accountNumber: "",
-      cardNumber: "",
-      creditAmount: 0,
+      account_number: "",
+      card_number: "",
+      credit_amount: 0,
       description: "",
     })
     setError("")
@@ -66,8 +66,8 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
         <input
           type="text"
           placeholder="نام و نام خانوادگی"
-          value={newSeller.fullName}
-          onChange={(e) => setNewSeller({ ...newSeller, fullName: e.target.value })}
+          value={newSeller.full_name}
+          onChange={(e) => setNewSeller({ ...newSeller, full_name: e.target.value })}
           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
@@ -80,22 +80,22 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
         <input
           type="text"
           placeholder="شماره حساب"
-          value={newSeller.accountNumber}
-          onChange={(e) => setNewSeller({ ...newSeller, accountNumber: e.target.value })}
+          value={newSeller.account_number}
+          onChange={(e) => setNewSeller({ ...newSeller, account_number: e.target.value })}
           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="text"
           placeholder="شماره کارت"
-          value={newSeller.cardNumber}
-          onChange={(e) => setNewSeller({ ...newSeller, cardNumber: formatCardNumber(e.target.value) })}
+          value={newSeller.card_number}
+          onChange={(e) => setNewSeller({ ...newSeller, card_number: formatCardNumber(e.target.value) })}
           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ltr-input"
         />
         <input
           type="number"
           placeholder="مقدار امتیاز برای فروش"
-          value={newSeller.creditAmount || ""}
-          onChange={(e) => setNewSeller({ ...newSeller, creditAmount: Number.parseInt(e.target.value) || 0 })}
+          value={newSeller.credit_amount || ""}
+          onChange={(e) => setNewSeller({ ...newSeller, credit_amount: Number.parseInt(e.target.value) || 0 })}
           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <textarea
@@ -105,20 +105,20 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
         />
-        {newSeller.creditAmount > 0 && (
+        {newSeller.credit_amount > 0 && (
           <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200 mb-4">
             <div className="text-sm text-gray-600">ارزش کل امتیاز</div>
             <div className="text-2xl font-bold text-green-600">
-              {(newSeller.creditAmount * creditPrice).toLocaleString("fa-IR")} تومان
+              {(newSeller.credit_amount * creditPrice).toLocaleString("fa-IR")} تومان
             </div>
             <div className="text-xs text-gray-500">
-              {newSeller.creditAmount} امتیاز × {creditPrice.toLocaleString("fa-IR")} تومان
+              {newSeller.credit_amount} امتیاز × {creditPrice.toLocaleString("fa-IR")} تومان
             </div>
           </div>
         )}
         <button
           onClick={handleAddSeller}
-          disabled={!newSeller.fullName || !newSeller.phone || newSeller.creditAmount <= 0}
+          disabled={!newSeller.full_name || !newSeller.phone || newSeller.credit_amount <= 0}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
         >
           اضافه کردن فروشنده
