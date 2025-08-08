@@ -3,12 +3,12 @@ import moment from "jalali-moment";
 
 interface Seller {
   id: string;
-  fullName: string;
+  full_name: string;
   phone: string;
-  accountNumber: string;
-  cardNumber: string;
-  creditAmount: number;
-  remainingAmount: number;
+  account_number: string;
+  card_number: string;
+  credit_amount: number;
+  remaining_amount: number;
   status: "active" | "completed";
   description?: string;
 }
@@ -17,10 +17,10 @@ interface Buyer {
   id: string;
   name: string;
   phone: string;
-  nationalId: string;
+  national_id: string;
   referrer?: string;
-  requestedAmount: number;
-  remainingAmount: number;
+  requested_amount: number;
+  remaining_amount: number;
   status: "pending" | "partial" | "completed";
 }
 
@@ -42,7 +42,7 @@ interface TransactionMatchingProps {
     seller: Seller,
     buyer: Buyer,
     transferAmount: number,
-    trackingCode: string
+    tracking_code: string
   ) => string;
   generateTrackingCode: (
     jalaliDate: string,
@@ -68,10 +68,10 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
   const selectedBuyersInfo = buyers.filter((b) => selectedBuyers.includes(b.id));
 
   const totalSelectedDemand = selectedBuyersInfo.reduce(
-    (sum, b) => sum + b.remainingAmount,
+    (sum, b) => sum + b.remaining_amount,
     0
   );
-  const availableCredit = selectedSellerInfo?.remainingAmount || 0;
+  const availableCredit = selectedSellerInfo?.remaining_amount || 0;
   const transferableAmount = Math.min(availableCredit, totalSelectedDemand);
 
   return (
@@ -94,11 +94,11 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                   }`}
                 >
                   <div className="font-semibold text-gray-800">
-                    {seller.fullName}
+                    {seller.full_name}
                   </div>
                   <div className="text-sm text-gray-500">{seller.phone}</div>
                   <div className="text-sm text-green-600 mt-2 font-medium">
-                    موجودی: {seller.remainingAmount.toLocaleString()} امتیاز
+                    موجودی: {seller.remaining_amount.toLocaleString()} امتیاز
                   </div>
                 </div>
               ))}
@@ -109,7 +109,7 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
           <h3 className="font-medium mb-3 text-lg">۲. انتخاب خریداران</h3>
           <div className="space-y-3 max-h-96 overflow-y-auto p-2">
             {buyers
-              .filter((b) => b.remainingAmount > 0)
+              .filter((b) => b.remaining_amount > 0)
               .map((buyer) => (
                 <div
                   key={buyer.id}
@@ -133,7 +133,7 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                   </div>
                   <div className="text-sm text-gray-500">{buyer.phone}</div>
                   <div className="text-sm text-red-600 mt-2 font-medium">
-                    نیاز: {buyer.remainingAmount.toLocaleString()} امتیاز
+                    نیاز: {buyer.remaining_amount.toLocaleString()} امتیاز
                   </div>
                 </div>
               ))}
@@ -148,10 +148,10 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
             <div className="space-y-4 max-h-60 overflow-y-auto">
               {selectedBuyersInfo.map((buyer) => {
                 const transferAmount = Math.min(
-                  buyer.remainingAmount,
-                  selectedSellerInfo.remainingAmount
+                  buyer.remaining_amount,
+                  selectedSellerInfo.remaining_amount
                 );
-                const trackingCode = generateTrackingCode(
+                const tracking_code = generateTrackingCode(
                   moment().locale("fa").format("YYYY/MM/DD"),
                   transactions
                 );
@@ -159,7 +159,7 @@ const TransactionMatching: React.FC<TransactionMatchingProps> = ({
                   selectedSellerInfo,
                   buyer,
                   transferAmount,
-                  trackingCode
+                  tracking_code
                 );
                 return (
                   <div key={buyer.id} className="bg-white p-4 rounded-lg border">

@@ -10,7 +10,7 @@ interface Transaction {
   buyerPhones:string[];
   amount: number;
   date: string;
-  trackingCode: string;
+  tracking_code: string;
 }
 
 interface PrintableDocumentProps {
@@ -28,7 +28,7 @@ const PrintableDocument: React.FC<PrintableDocumentProps> = ({
         <div className="logo">مجموعه رسانت</div>
         <div className="tracking-code">
           <span>کد پیگیری:</span>
-          <span>{transaction.trackingCode}</span>
+          <span>{transaction.tracking_code}</span>
         </div>
       </div>
       <h1 className="title">سند تحویل امتیاز وام</h1>

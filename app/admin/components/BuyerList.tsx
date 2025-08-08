@@ -4,10 +4,10 @@ interface Buyer {
   id: string
   name: string
   phone: string
-  nationalId: string
+  national_id: string
   referrer?: string
-  requestedAmount: number
-  remainingAmount: number
+  requested_amount: number
+  remaining_amount: number
   status: "pending" | "partial" | "completed"
 }
 
@@ -65,10 +65,10 @@ const BuyerList: React.FC<BuyerListProps> = ({ buyers, openAddBuyerModal, status
                 <div>
                   <h3 className="font-medium">{buyer.name}</h3>
                   <p className="text-sm text-gray-600">{buyer.phone}</p>
-                  <p className="text-sm text-gray-600">کد ملی: {buyer.nationalId}</p>
+                  <p className="text-sm text-gray-600">کد ملی: {buyer.national_id}</p>
                   {buyer.referrer && <p className="text-sm text-blue-600">معرف: {buyer.referrer}</p>}
                   <p className="text-sm mt-1">
-                    درخواست: {buyer.requestedAmount} امتیاز | باقیمانده: {buyer.remainingAmount} امتیاز
+                    درخواست: {buyer.requested_amount} امتیاز | باقیمانده: {buyer.remaining_amount} امتیاز
                   </p>
                 </div>
                 <span

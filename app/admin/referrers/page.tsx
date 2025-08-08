@@ -8,7 +8,7 @@ interface Referrer {
   id: string;
   name: string;
   phone?: string;
-  nationalId?: string;
+  national_id?: string;
 }
 
 export default function ReferrersPage() {
@@ -16,7 +16,7 @@ export default function ReferrersPage() {
   const [newReferrer, setNewReferrer] = useState({
     name: "",
     phone: "",
-    nationalId: "",
+    national_id: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function ReferrersPage() {
         {
           name: newReferrer.name,
           phone: newReferrer.phone || null,
-          nationalId: newReferrer.nationalId || null,
+          national_id: newReferrer.national_id || null,
         },
       ])
       .select();
@@ -61,7 +61,7 @@ export default function ReferrersPage() {
       if (data) {
         setReferrers([...referrers, ...data]);
       }
-      setNewReferrer({ name: "", phone: "", nationalId: "" });
+      setNewReferrer({ name: "", phone: "", national_id: "" });
       setError("");
     }
   };
@@ -106,9 +106,9 @@ export default function ReferrersPage() {
                 <input
                   type="text"
                   placeholder="کد ملی (اختیاری)"
-                  value={newReferrer.nationalId}
+                  value={newReferrer.national_id}
                   onChange={(e) =>
-                    setNewReferrer({ ...newReferrer, nationalId: e.target.value })
+                    setNewReferrer({ ...newReferrer, national_id: e.target.value })
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -166,7 +166,7 @@ export default function ReferrersPage() {
                           {referrer.phone || "-"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {referrer.nationalId || "-"}
+                          {referrer.national_id || "-"}
                         </td>
                       </tr>
                     ))

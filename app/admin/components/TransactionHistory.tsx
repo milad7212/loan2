@@ -28,7 +28,7 @@ interface Transaction {
   buyerPhones: string[];
   buyerNationalIds: string[];
   buyerReferrers: (string | undefined)[];
-  trackingCode: string;
+  tracking_code: string;
   message: string;
   history: Array<{
     status: string;
@@ -104,7 +104,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
       transaction.buyerNames.some((name) =>
         name.toLowerCase().includes(lowercasedSearchTerm)
       ) ||
-      transaction.trackingCode.toLowerCase().includes(lowercasedSearchTerm) ||
+      transaction.tracking_code.toLowerCase().includes(lowercasedSearchTerm) ||
       transaction.sellerPhone.includes(searchTerm) ||
       transaction.buyerPhones.some((phone) => phone.includes(searchTerm)) ||
       transaction.sellerNationalId.includes(searchTerm) ||
@@ -147,7 +147,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             ? t.buyerReferrers.filter(Boolean).join(", ")
             : "-",
         مقدار: t.amount,
-        "کد پیگیری": t.trackingCode,
+        "کد پیگیری": t.tracking_code,
         وضعیت: t.status,
       }))
     );
@@ -224,7 +224,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                   <div className="text-gray-500">{transaction.buyerPhones.join(", ")}</div>
                 </td>
                 <td className="py-4 px-4 whitespace-nowrap">{transaction.amount} امتیاز</td>
-                <td className="py-4 px-4 whitespace-nowrap font-mono text-xs">{transaction.trackingCode}</td>
+                <td className="py-4 px-4 whitespace-nowrap font-mono text-xs">{transaction.tracking_code}</td>
                 <td className="py-4 px-4 whitespace-nowrap">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${

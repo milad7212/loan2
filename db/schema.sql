@@ -8,13 +8,16 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- NOTE: If you have existing tables, you will need to either DROP them first
--- or use ALTER TABLE to rename the columns.
+-- or use ALTER TABLE to rename/add columns.
 -- Example: ALTER TABLE buyers RENAME COLUMN "nationalId" TO national_id;
+-- Example: ALTER TABLE referrers ADD COLUMN phone TEXT;
 
 -- Table for Referrers
 CREATE TABLE referrers (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
+    phone TEXT,
+    national_id TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -53,7 +53,7 @@ BEGIN
     END LOOP;
 
     -- Lock the seller row to prevent race conditions and get their current credit
-    SELECT remainingAmount INTO seller_remaining_credit
+    SELECT remaining_amount INTO seller_remaining_credit
     FROM sellers
     WHERE id = p_seller_id
     FOR UPDATE;
@@ -92,9 +92,9 @@ BEGIN
 
         -- Update buyer's remaining amount and status
         UPDATE buyers
-        SET remainingAmount = remainingAmount - amount_to_transfer,
+        SET remaining_amount = remaining_amount - amount_to_transfer,
             status = CASE
-                        WHEN (remainingAmount - amount_to_transfer) <= 0 THEN 'completed'
+                        WHEN (remaining_amount - amount_to_transfer) <= 0 THEN 'completed'
                         ELSE 'partial'
                      END
         WHERE id = buyer_id;
@@ -117,7 +117,7 @@ BEGIN
 
     -- 5. Update seller's remaining credit
     UPDATE sellers
-    SET remainingAmount = remainingAmount - total_transaction_amount
+    SET remaining_amount = remaining_amount - total_transaction_amount
     WHERE id = p_seller_id;
 
 END;

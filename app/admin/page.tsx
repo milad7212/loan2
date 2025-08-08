@@ -137,7 +137,7 @@ export default function LoanCreditAdmin() {
             supabase
               .from("transactions")
               .select(
-                "*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"
+                "*, seller:sellers(full_name), buyers:transaction_buyers(buyer:buyers(name))"
               ),
             supabase.from("referrers").select("id, name"),
           ]);
@@ -239,7 +239,7 @@ export default function LoanCreditAdmin() {
     seller: Seller,
     buyer: Buyer,
     transferAmount: number,
-    trackingCode: string
+    tracking_code: string
   ) => {
     return `${seller.full_name} عزیز،
 
@@ -253,7 +253,7 @@ export default function LoanCreditAdmin() {
       "fa-IR"
     )} تومان) پس از انجام انتقال و بررسی نهایی، به حساب شما واریز خواهد شد.
 
-کد پیگیری: ${trackingCode}
+کد پیگیری: ${tracking_code}
 (لطفاً این کد را جهت هرگونه پیگیری نزد خود نگه دارید.)
 
 با تشکر از همکاری شما
@@ -265,14 +265,14 @@ export default function LoanCreditAdmin() {
    * @param sellerData The data of the new seller.
    */
   const addSeller = async (
-    sellerData: Omit<Seller, "id" | "remainingAmount" | "status">
+    sellerData: Omit<Seller, "id" | "remaining_amount" | "status">
   ) => {
     const { data, error } = await supabase
       .from("sellers")
       .insert([
         {
           ...sellerData,
-          remainingAmount: sellerData.creditAmount,
+          remaining_amount: sellerData.credit_amount,
           status: "active",
         },
       ])
@@ -304,7 +304,7 @@ export default function LoanCreditAdmin() {
       setBuyerError("نام خریدار الزامی است.");
       return;
     }
-    if (!newBuyer.nationalId) {
+    if (!newBuyer.national_id) {
       setBuyerError("کد ملی خریدار الزامی است.");
       return;
     }
@@ -347,10 +347,10 @@ export default function LoanCreditAdmin() {
       }
       setNewBuyer({
         name: "",
-        nationalId: "",
+        national_id: "",
         phone: "",
         referrer: "",
-        requestedAmount: 0,
+        requested_amount: 0,
         description: "",
       });
       setBuyerError("");
@@ -375,7 +375,7 @@ export default function LoanCreditAdmin() {
     if (!seller) return;
 
     const selectedBuyerObjects = buyers.filter(
-      (b) => selectedBuyers.includes(b.id) && b.remainingAmount > 0
+      (b) => selectedBuyers.includes(b.id) && b.remaining_amount > 0
     );
 
     if (selectedBuyerObjects.length === 0) {
@@ -386,21 +386,21 @@ export default function LoanCreditAdmin() {
     }
 
     const validBuyerIds = selectedBuyerObjects.map((b) => b.id);
-    const amounts = selectedBuyerObjects.map((b) => b.remainingAmount);
+    const amounts = selectedBuyerObjects.map((b) => b.remaining_amount);
     const currentDate = moment().locale("fa").format("YYYY/MM/DD");
-    const trackingCode = generateTrackingCode(currentDate, transactions);
+    const tracking_code = generateTrackingCode(currentDate, transactions);
     const message = generateMessage(
       seller,
       selectedBuyerObjects[0],
       amounts[0],
-      trackingCode
+      tracking_code
     );
 
     const { data, error } = await supabase.rpc("create_transaction", {
       p_seller_id: selectedSeller,
       p_buyer_ids: validBuyerIds,
       p_amounts: amounts,
-      p_tracking_code: trackingCode,
+      p_tracking_code: tracking_code,
       p_message: message,
     });
 
@@ -415,7 +415,7 @@ export default function LoanCreditAdmin() {
         supabase
           .from("transactions")
           .select(
-            "*, seller:sellers(fullName), buyers:transaction_buyers(buyer:buyers(name))"
+            "*, seller:sellers(full_name), buyers:transaction_buyers(buyer:buyers(name))"
           ),
       ]);
 
@@ -484,7 +484,7 @@ export default function LoanCreditAdmin() {
         return {
           sellerPhone,
           sellerName: transactions[0].sellerName,
-          sellerCardNumber: seller?.cardNumber || "",
+          sellerCardNumber: seller?.card_number || "",
           transactions,
           totalAmount,
           referrerPayments,
@@ -790,7 +790,7 @@ export default function LoanCreditAdmin() {
           <input
             type="text"
             placeholder="کد ملی"
-            value={newBuyer.nationalId}
+            value={newBuyer.national_id}
             onChange={(e) =>
               setNewBuyer({ ...newBuyer, national_id: e.target.value })
             }
@@ -822,7 +822,7 @@ export default function LoanCreditAdmin() {
           <input
             type="number"
             placeholder="مقدار امتیاز درخواستی"
-            value={newBuyer.requestedAmount || ""}
+            value={newBuyer.requested_amount || ""}
             onChange={(e) =>
               setNewBuyer({
                 ...newBuyer,
@@ -1020,14 +1020,14 @@ export default function LoanCreditAdmin() {
                     if (
                       selectedStatusTransaction.buyer_ids.includes(buyer.id)
                     ) {
-                      const newRemainingAmount =
-                        buyer.remainingAmount +
+                      const new_remaining_amount =
+                        buyer.remaining_amount +
                         selectedStatusTransaction.amount;
                       return {
                         ...buyer,
-                        remaining_amount: newRemainingAmount,
+                        remaining_amount: new_remaining_amount,
                         status:
-                          newRemainingAmount >= buyer.requested_amount
+                          new_remaining_amount >= buyer.requested_amount
                             ? ("pending" as const)
                             : ("partial" as const),
                       };
