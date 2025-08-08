@@ -233,7 +233,12 @@ export default function LoanCreditAdmin() {
       .toString()
       .padStart(3, "0");
 
-    return `${datePrefix}${sequenceNumber}`;
+    // Add a random component to prevent collisions from rapid creation
+    const randomSuffix = Math.floor(Math.random() * 100)
+      .toString()
+      .padStart(2, "0");
+
+    return `${datePrefix}${sequenceNumber}${randomSuffix}`;
   };
 
   const generateMessage = (
