@@ -369,10 +369,18 @@ export default function LoanCreditAdmin() {
     const seller = sellers.find((s) => s.id === selectedSeller);
     if (!seller) return;
 
-    const selectedBuyerObjects = buyers.filter((b) =>
-      selectedBuyers.includes(b.id)
+    const selectedBuyerObjects = buyers.filter(
+      (b) => selectedBuyers.includes(b.id) && b.remainingAmount > 0
     );
 
+    if (selectedBuyerObjects.length === 0) {
+      setTransactionError(
+        "تمامی خریداران انتخاب شده دارای امتیاز باقیمانده صفر می باشند."
+      );
+      return;
+    }
+
+    const validBuyerIds = selectedBuyerObjects.map((b) => b.id);
     const amounts = selectedBuyerObjects.map((b) => b.remainingAmount);
     const currentDate = moment().locale("fa").format("YYYY/MM/DD");
     const trackingCode = generateTrackingCode(currentDate, transactions);
@@ -385,7 +393,7 @@ export default function LoanCreditAdmin() {
 
     const { data, error } = await supabase.rpc("create_transaction", {
       p_seller_id: selectedSeller,
-      p_buyer_ids: selectedBuyers,
+      p_buyer_ids: validBuyerIds,
       p_amounts: amounts,
       p_tracking_code: trackingCode,
       p_message: message,
