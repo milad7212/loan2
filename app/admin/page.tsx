@@ -273,24 +273,27 @@ export default function LoanCreditAdmin() {
   const addSeller = async (
     sellerData: Omit<Seller, "id" | "remaining_amount" | "status">
   ) => {
+    const newSellerWithDefaults = {
+      ...sellerData,
+      remaining_amount: sellerData.credit_amount,
+      status: "active" as const,
+    };
+
     const { data, error } = await supabase
       .from("sellers")
-      .insert([
-        {
-          ...sellerData,
-          remaining_amount: sellerData.credit_amount,
-          status: "active",
-        },
-      ])
-      .select();
+      .insert(newSellerWithDefaults)
+      .select()
+      .single(); // Assuming we get a single object back
 
     if (error) {
       console.error("Error adding seller:", error);
+      // You could set an error state here to show in the modal
     } else {
       if (data) {
-        setSellers([...sellers, ...data]);
+        // Since 'data' is a single object, we add it to the array
+        setSellers(prevSellers => [...prevSellers, data]);
       }
-      setIsAddSellerModalOpen(false);
+      setIsAddSellerModalOpen(false); // Close modal on success
     }
   };
 
@@ -323,21 +326,22 @@ export default function LoanCreditAdmin() {
       return;
     }
 
+    const newBuyerData = {
+      name: newBuyer.name,
+      national_id: newBuyer.national_id,
+      phone: newBuyer.phone,
+      referrer_id: newBuyer.referrer || null,
+      requested_amount: newBuyer.requested_amount,
+      remaining_amount: newBuyer.requested_amount,
+      status: "pending" as const,
+      description: newBuyer.description,
+    };
+
     const { data, error } = await supabase
       .from("buyers")
-      .insert([
-        {
-          name: newBuyer.name,
-          national_id: newBuyer.national_id,
-          phone: newBuyer.phone,
-          referrer_id: newBuyer.referrer || null,
-          requested_amount: newBuyer.requested_amount,
-          remaining_amount: newBuyer.requested_amount,
-          status: "pending",
-          description: newBuyer.description,
-        },
-      ])
-      .select();
+      .insert(newBuyerData)
+      .select()
+      .single();
 
     if (error) {
       console.error("Error adding buyer:", error);
@@ -349,7 +353,7 @@ export default function LoanCreditAdmin() {
       setBuyerError(errorMessage);
     } else {
       if (data) {
-        setBuyers([...buyers, ...data]);
+        setBuyers(prevBuyers => [...prevBuyers, data]);
       }
       setNewBuyer({
         name: "",
@@ -428,7 +432,7 @@ export default function LoanCreditAdmin() {
       tracking_code
     );
 
-    const { data, error } = await supabase.rpc("create_transaction", {
+    const { data: newTransaction, error } = await supabase.rpc("create_transaction", {
       p_seller_id: selectedSeller,
       p_buyer_ids: buyerIdsForRpc,
       p_amounts: amountsForTransaction,
@@ -438,23 +442,37 @@ export default function LoanCreditAdmin() {
 
     if (error) {
       console.error("Error creating transaction:", error);
-      setTransactionError("خطا در ایجاد معامله");
+      setTransactionError(`خطا در ایجاد معامله: ${error.message}`);
     } else {
-      // Manually refetch data to update the UI.
-      const [buyersRes, sellersRes, transactionsRes] = await Promise.all([
-        supabase.from("buyers").select("*"),
-        supabase.from("sellers").select("*"),
-        supabase
-          .from("transactions")
-          .select(
-            "*, seller:sellers(full_name, phone, national_id), buyers:transaction_buyers(buyer:buyers(name, phone, national_id, referrer_id))"
-          ),
-      ]);
+      // Update states optimistically based on the transaction logic
+      // This is faster than re-fetching everything.
 
-      if (buyersRes.data) setBuyers(buyersRes.data);
-      if (sellersRes.data) setSellers(sellersRes.data);
-      if (transactionsRes.data) setTransactions(transactionsRes.data);
+      // 1. Update transactions list
+      setTransactions(prev => [newTransaction, ...prev]);
 
+      // 2. Update seller's remaining amount
+      const totalAmountTransferred = amountsForTransaction.reduce((sum, a) => sum + a, 0);
+      setSellers(prev => prev.map(s =>
+        s.id === selectedSeller
+          ? { ...s, remaining_amount: s.remaining_amount - totalAmountTransferred }
+          : s
+      ));
+
+      // 3. Update buyers' remaining amounts
+      setBuyers(prev => prev.map(b => {
+        const transactionIndex = buyerIdsForRpc.indexOf(b.id);
+        if (transactionIndex !== -1) {
+          const newRemaining = b.remaining_amount - amountsForTransaction[transactionIndex];
+          return {
+            ...b,
+            remaining_amount: newRemaining,
+            status: newRemaining <= 0 ? 'completed' : 'partial'
+          };
+        }
+        return b;
+      }));
+
+      // 4. Reset UI state
       setSelectedSeller("");
       setSelectedBuyers([]);
       setTransactionError("");
