@@ -372,34 +372,60 @@ export default function LoanCreditAdmin() {
     }
 
     const seller = sellers.find((s) => s.id === selectedSeller);
-    if (!seller) return;
+    if (!seller) {
+      setTransactionError("فروشنده انتخاب شده معتبر نیست.");
+      return;
+    }
 
-    const selectedBuyerObjects = buyers.filter(
-      (b) => selectedBuyers.includes(b.id) && b.remaining_amount > 0
-    );
+    let availableCredit = seller.remaining_amount;
 
-    if (selectedBuyerObjects.length === 0) {
+    if (availableCredit <= 0) {
+      setTransactionError("فروشنده اعتبار کافی برای انجام معامله ندارد.");
+      return;
+    }
+
+    const buyersForTransaction: Buyer[] = [];
+    const amountsForTransaction: number[] = [];
+
+    // Prioritize selected buyers but respect their order of selection if possible
+    const potentialBuyers = buyers.filter((b) => selectedBuyers.includes(b.id) && b.remaining_amount > 0);
+
+    for (const buyer of potentialBuyers) {
+      if (availableCredit <= 0) break;
+
+      const amountToTransfer = Math.min(buyer.remaining_amount, availableCredit);
+
+      if (amountToTransfer > 0) {
+        buyersForTransaction.push(buyer);
+        amountsForTransaction.push(amountToTransfer);
+        availableCredit -= amountToTransfer;
+      }
+    }
+
+    if (buyersForTransaction.length === 0) {
       setTransactionError(
-        "تمامی خریداران انتخاب شده دارای امتیاز باقیمانده صفر می باشند."
+        "امکان ایجاد معامله وجود ندارد. یا اعتبار فروشنده کافی نیست یا خریداران نیازی ندارند."
       );
       return;
     }
 
-    const validBuyerIds = selectedBuyerObjects.map((b) => b.id);
-    const amounts = selectedBuyerObjects.map((b) => b.remaining_amount);
+    const buyerIdsForRpc = buyersForTransaction.map(b => b.id);
+
+    // For simplicity, the message is generated for the first buyer in the actual transaction list.
+    // A more complex implementation could generate a summary message.
     const currentDate = moment().locale("fa").format("YYYY/MM/DD");
     const tracking_code = generateTrackingCode(currentDate, transactions);
     const message = generateMessage(
       seller,
-      selectedBuyerObjects[0],
-      amounts[0],
+      buyersForTransaction[0],
+      amountsForTransaction[0],
       tracking_code
     );
 
     const { data, error } = await supabase.rpc("create_transaction", {
       p_seller_id: selectedSeller,
-      p_buyer_ids: validBuyerIds,
-      p_amounts: amounts,
+      p_buyer_ids: buyerIdsForRpc,
+      p_amounts: amountsForTransaction,
       p_tracking_code: tracking_code,
       p_message: message,
     });
