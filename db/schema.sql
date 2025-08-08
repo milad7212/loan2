@@ -25,6 +25,7 @@ CREATE TABLE referrers (
 CREATE TABLE sellers (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     full_name TEXT NOT NULL,
+    national_id TEXT,
     phone TEXT,
     account_number TEXT,
     card_number TEXT,

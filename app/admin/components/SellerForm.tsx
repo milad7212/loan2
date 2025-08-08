@@ -31,6 +31,7 @@ interface SellerFormProps {
 const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
   const [newSeller, setNewSeller] = useState({
     full_name: "",
+    national_id: "",
     phone: "",
     account_number: "",
     card_number: "",
@@ -48,6 +49,7 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
     addSeller(newSeller)
     setNewSeller({
       full_name: "",
+      national_id: "",
       phone: "",
       account_number: "",
       card_number: "",
@@ -68,6 +70,13 @@ const SellerForm: React.FC<SellerFormProps> = ({ addSeller, creditPrice }) => {
           placeholder="نام و نام خانوادگی"
           value={newSeller.full_name}
           onChange={(e) => setNewSeller({ ...newSeller, full_name: e.target.value })}
+          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="text"
+          placeholder="کد ملی"
+          value={newSeller.national_id}
+          onChange={(e) => setNewSeller({ ...newSeller, national_id: e.target.value })}
           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
