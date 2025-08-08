@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 
 interface Transaction {
-  id: string;
-  sellerId: string;
-  buyerIds: string[];
+  id:string;
+  seller_id: string;
+  buyer_ids: string[];
   amount: number;
   status:
     | "pending_transfer"

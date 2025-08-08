@@ -201,6 +201,8 @@ export default function LoanCreditAdmin() {
     requestedAmount: 0,
     description: "",
   });
+  const [buyerError, setBuyerError] = useState("");
+  const [transactionError, setTransactionError] = useState("");
 
   // Functions
 
@@ -294,8 +296,6 @@ export default function LoanCreditAdmin() {
     );
   }
 
-  const [buyerError, setBuyerError] = useState("");
-
   /**
    * Adds a new buyer to the list of buyers.
    */
@@ -352,8 +352,6 @@ export default function LoanCreditAdmin() {
       setIsAddBuyerModalOpen(false);
     }
   };
-
-  const [transactionError, setTransactionError] = useState("");
 
   /**
    * Creates a new transaction between a seller and one or more buyers.
@@ -501,24 +499,28 @@ export default function LoanCreditAdmin() {
       image: paymentImage || undefined,
     };
 
-    const { error } = await supabase
-      .from("transactions")
-      .update({
-        status: "completed",
-        history: supabase.sql`history || ${JSON.stringify(
-          newHistoryEntry
-        )}::jsonb`,
-      })
-      .in("id", transactionIds);
+    const updates = group.transactions.map((t) => {
+      const newHistory = [...t.history, newHistoryEntry];
+      return supabase
+        .from("transactions")
+        .update({ status: "completed", history: newHistory })
+        .eq("id", t.id);
+    });
 
-    if (error) {
-      console.error("Error updating transactions:", error);
+    const results = await Promise.all(updates);
+    const hasError = results.some((res) => res.error);
+
+    if (hasError) {
+      console.error(
+        "Error updating transactions:",
+        results.map((r) => r.error).filter(Boolean)
+      );
     } else {
       const updatedTransactions = transactions.map((t) =>
         transactionIds.includes(t.id)
           ? {
               ...t,
-              status: "completed",
+              status: "completed" as const,
               history: [...t.history, newHistoryEntry],
             }
           : t
@@ -1013,8 +1015,8 @@ export default function LoanCreditAdmin() {
                         remainingAmount: newRemainingAmount,
                         status:
                           newRemainingAmount >= buyer.requestedAmount
-                            ? "pending"
-                            : "partial",
+                            ? ("pending" as const)
+                            : ("partial" as const),
                       };
                     }
                     return buyer;
@@ -1029,7 +1031,7 @@ export default function LoanCreditAdmin() {
                         remainingAmount:
                           seller.remainingAmount +
                           selectedStatusTransaction.amount,
-                        status: "active",
+                        status: "active" as const,
                       };
                     }
                     return seller;
@@ -1048,13 +1050,16 @@ export default function LoanCreditAdmin() {
                   image: uploadedImage || undefined,
                 };
 
+                const newHistory = [
+                  ...selectedStatusTransaction.history,
+                  newHistoryEntry,
+                ];
+
                 const { error } = await supabase
                   .from("transactions")
                   .update({
                     status: selectedStatusTransaction.status,
-                    history: supabase.sql`history || ${JSON.stringify(
-                      newHistoryEntry
-                    )}::jsonb`,
+                    history: newHistory,
                   })
                   .eq("id", selectedStatusTransaction.id);
 
